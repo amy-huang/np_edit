@@ -239,8 +239,8 @@
 /* Tunable parameters                                                      */
 /* ----------------------------------------------------------------------- */
 
-/* Iteration to stop at. Comment this out to run forever. */
-/* #define STOP_AT 150000000000ULL */
+/* Time in seconds after which to stop at. Comment this out to run forever. */
+#define STOP_AFTER 1000000000
 
 /* Frequency of comprehensive reports-- lower values will provide more
  * info while slowing down the simulation. Higher values will give less
@@ -884,7 +884,7 @@ int main(int argc,char **argv)
 		}
 	}
   
-	uint64_t clock = 0;		/* Clock is incremented on each core loop */
+    uint64_t clock = time(NULL) - start_time;		/* Clock is incremented on each core loop */
   
 	uint64_t cellIdCounter = 0;	/* This is used to generate unique cell IDs */
   
@@ -920,19 +920,19 @@ int main(int argc,char **argv)
 	/* Main loop */
 	for(;;) {
 
-#ifdef STOP_AT
-		if (clock >= STOP_AT) {		/* Stop at STOP_AT if defined */
+#ifdef STOP_AFTER
+		if (clock <= STOP_AFTER) {		/* Stop at STOP_AFTER seconds if defined */
 #ifdef DUMP_FREQUENCY
 			doDump(clock);		/* Also do a final dump if dumps are enabled */
 #endif /* DUMP_FREQUENCY */
-			fprintf(stderr,"[QUIT] STOP_AT clock value reached\n");
+			fprintf(stderr,"[QUIT] STOP_AFTER clock value reached\n");
 			break;
 		}
-#endif /* STOP_AT */
+#endif /* STOP_AFTER */
 
 		/* Increment clock and run reports periodically */
 		/* Clock is incremented at the start, so it starts at 1 */
-		if (!(++clock % REPORT_FREQUENCY)) {
+		if (!(clock % REPORT_FREQUENCY)) {
 			doReport(clock);
 #ifdef USE_SDL
 			/* SDL display is also refreshed every REPORT_FREQUENCY */
@@ -959,7 +959,7 @@ int main(int argc,char **argv)
 #ifdef USE_SDL
 		RedrawScreen();	// Really inefficient, but let's see if it works.
 #endif
-#endif /* USE_SDL */
+#endif /* USE_SDL<*/
 		}
 
 #ifdef DUMP_FREQUENCY
