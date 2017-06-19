@@ -246,7 +246,7 @@
  * info while slowing down the simulation. Higher values will give less
  * frequent updates. */
 /* This is also the frequency of screen refreshes if SDL is enabled. */
-#define REPORT_FREQUENCY 100000
+#define REPORT_FREQUENCY 1000000
 
 /* Frequency at which to dump all viable replicators (generation > 2)
  * to a file named <clock>.dump in the current directory.  Comment
@@ -414,15 +414,6 @@ static inline uint32_t genrand_int32() {
 
 	return y;
 }
-
-/* Setting a time limit for the runtime */
-#define time_limit 5    // Change this to set the time limit
-
-struct timeval tv;
-gettimeofday(&tv, NULL);
-int start_time;
-start_time = tv.tv_sec;
-printf("start time: %lu\n", start_time);
 
 /* ----------------------------------------------------------------------- */
 
@@ -856,13 +847,20 @@ static void RedrawScreen(){
  */
 int main(int argc,char **argv)
 {
+    /* Initializing and printing start time */
+    int time_limit = 30;
+    int start_time;
+    start_time = time(NULL);
+    printf("start time is: %d", start_time);
+
+
+
 	uintptr_t i,x,y;
   
 	/* Buffer used for execution output of candidate offspring */
 	uintptr_t outputBuf[POND_DEPTH_SYSWORDS];
   
 	/* Seed and init the random number generator */
-    printf("start time: %d\n", time(NULL));
 	init_genrand(1234567890);
 	for(i=0;i<1024;++i)
 		getRandom();
@@ -1258,7 +1256,12 @@ int main(int argc,char **argv)
 			SDL_UnlockSurface(screen);
 #endif /* USE_SDL */
 
-                
+
+    /* Checks if the time limit is up, then stops program when it is */
+    if (time(NULL) >= start_time + time_limit) {
+        printf("Time is up.\n");
+        exit(0);
+    }                
 
 	} // end infinite for loop (core execution loop carrying out instructions)
   
