@@ -979,7 +979,7 @@ int main(int argc,char **argv)
 		if (!(clock % INFLOW_FREQUENCY)) {
 			x = getRandom() % POND_SIZE_X;
 			y = getRandom() % POND_SIZE_Y;
-			currCell &= cellArray[x][y];
+			currCell = &cellArray[x][y];
 			currCell->ID = cellIDCounter;
 			currCell->parentID = 0;
 			currCell->lineage = cellIDCounter;
@@ -1007,7 +1007,7 @@ int main(int argc,char **argv)
 		/* Pick a random cell to execute */
 		x = getRandom() % POND_SIZE_X;
 		y = getRandom() % POND_SIZE_Y;
-		currCell = cellArray[x][y];
+		currCell = &cellArray[x][y];
 
 		/* Reset the state of the VM prior to execution */
 		for(i=0;i<MAX_WORDS_GENOME;++i)
