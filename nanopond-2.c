@@ -443,6 +443,8 @@ static const uintptr_t BITS_IN_FOURBIT_WORD[16] = { 0,1,1,2,1,2,2,3,1,2,2,3,2,3,
  * Structure for each cell in the pond
  */
 struct Cell {
+	int x;				/* Cell's x position in the cellArray */
+	int y;				/* Cell's y position in the cellArray */
 	uint64_t ID;			/* Globally unique cell ID */
 	uint64_t parentID;		/* ID of the cell's parent */
 	uint64_t lineage;		/* cell ID of the first cell in the lineage */
@@ -662,8 +664,11 @@ static void reportCell(FILE *file, struct Cell *cell) {
 /**
  * Get a neighbor in the pond in direction cell is facing
  */
-static inline struct Cell *getNeighbor(const uintptr_t x,const uintptr_t y,const uintptr_t dir)
+static inline struct Cell *getNeighbor(struct Cell *cell, const uintptr_t dir)
 {
+	x = cell.x;
+	y = cell.y;
+
 	/* Space is toroidal; it wraps at edges */
 	switch(dir) {
 		case N_LEFT: 	return (x) ? &cellArray[x-1][y] : &cellArray[POND_SIZE_X-1][y];
@@ -881,6 +886,8 @@ int main(int argc,char **argv)
 	* to 0xffff... */
 	for(x=0;x<POND_SIZE_X;++x) {
 		for(y=0;y<POND_SIZE_Y;++y) {
+			cellArray[x][y].x = x;
+			cellArray[x][y].y = y;
 			cellArray[x][y].ID = 0;
 			cellArray[x][y].parentID = 0;
 			cellArray[x][y].lineage = 0;
@@ -1155,7 +1162,7 @@ int main(int argc,char **argv)
 						currentWord = currCell->genome[wordPtr];
 						break;
 					case 0xd: /* KILL: Blow away neighboring cell if allowed with penalty on failure */
-						neighborCell = getNeighbor(x,y,cell_direction);
+						neighborCell = getNeighbor(currCell, cell_direction);
 						if (accessAllowed(neighborCell,cell_register,0)) {
 							if (neighborCell->generation > 2)
 								++statCounters.viableCellsKilled;
@@ -1179,7 +1186,7 @@ int main(int argc,char **argv)
 						}
 						break;
 					case 0xe: /* SHARE: Equalize energy between self and neighbor if allowed */
-						neighborCell = getNeighbor(x,y,cell_direction);
+						neighborCell = getNeighbor(currCell, cell_direction);
 						if (accessAllowed(neighborCell,cell_register,1)) {
 							if (neighborCell->generation > 2)
 								++statCounters.viableCellShares;
@@ -1213,7 +1220,7 @@ int main(int argc,char **argv)
 		* would never be executed and then would be replaced with random
 		* junk eventually. See the seeding code in the main loop above. */
 		if ((outputBuf[0] & 0xff) != 0xff) {
-            neighborCell = getNeighbor(x,y,cell_direction);
+            neighborCell = getNeighbor(currCell, cell_direction);
 			if ((neighborCell->energy)&&accessAllowed(neighborCell,cell_register,0)) {
 				/* If replacing a viable cell, update relevant stats for update */
 				if (neighborCell->generation > 2)
