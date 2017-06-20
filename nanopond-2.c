@@ -517,7 +517,7 @@ static void doUpdate(const uint64_t clock)
   
 	/* Look here to get the columns in the CSV output */
 	/* The first five are here and are self-explanatory */
-	printf("\nclock: %lu   total energy: %lu   total active cells: %lu  total viable replicators: %lu   max generation: %lu   viable cells replaced: %lu   viable cells killed: %lu   viable cell shares: %lu\n",
+	printf("\nclock: %llu   total energy: %llu   total active cells: %lu  total viable replicators: %lu   max generation: %lu   viable cells replaced: %lu   viable cells killed: %lu   viable cell shares: %lu\n",
 		(uint64_t)clock,
 		(uint64_t)totalEnergy,
 		(uint64_t)totalActiveCells,
