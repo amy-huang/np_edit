@@ -666,12 +666,12 @@ static inline struct Cell *getNeighbor(const uintptr_t x,const uintptr_t y,const
 {
 	/* Space is toroidal; it wraps at edges */
 	switch(dir) {
-		case N_LEFT: 	return (x) ? cellArray[x-1][y] : cellArray[POND_SIZE_X-1][y];
-		case N_RIGHT: 	return (x < (POND_SIZE_X-1)) ? cellArray[x+1][y] : cellArray[0][y];
-		case N_UP: 	return (y) ? cellArray[x][y-1] : cellArray[x][POND_SIZE_Y-1];
-		case N_DOWN: 	return (y < (POND_SIZE_Y-1)) ? cellArray[x][y+1] : cellArray[x][0];
+		case N_LEFT: 	return (x) ? &cellArray[x-1][y] : &cellArray[POND_SIZE_X-1][y];
+		case N_RIGHT: 	return (x < (POND_SIZE_X-1)) ? &cellArray[x+1][y] : &cellArray[0][y];
+		case N_UP: 	return (y) ? &cellArray[x][y-1] : &cellArray[x][POND_SIZE_Y-1];
+		case N_DOWN: 	return (y < (POND_SIZE_Y-1)) ? &cellArray[x][y+1] : &cellArray[x][0];
 	}
-	return cellArray[x][y]; /* This should never be reached */
+	return &cellArray[x][y]; /* This should never be reached */
 }
 
 /**
