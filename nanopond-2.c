@@ -239,7 +239,7 @@
 /* ----------------------------------------------------------------------- */
 
 /* Iteration to stop at. Comment this out to run forever. */
-/* #define STOP_AT 150000000000ULL */
+#define STOP_AT 100
 
 /* Frequency of comprehensive reports-- lower values will provide more
  * info while slowing down the simulation. Higher values will give less
@@ -571,7 +571,7 @@ static void doDump(const uint64_t clock)
 	uintptr_t x,y,wordPtr,shiftPtr,inst,stopCount,i;
 	struct Cell *pptr;
   
-	sprintf(buf,"%lu.dump.csv",clock);
+	sprintf(buf,"0%lu.dump.csv",clock);
 	d = fopen(buf,"w");
 	if (!d) {
 		fprintf(stderr,"[WARNING] Could not open %s for writing.\n",buf);
@@ -600,7 +600,7 @@ static void doDump(const uint64_t clock)
 					* a LOOP/REP pair that's always false. In any case, this
 					* would always result in our *underestimating* the size of
 					* the genome and would never result in an overestimation. */
-					fprintf(d,"instruction: %lx\n",inst);
+					fprintf(d,"%lx",inst);
 					if (inst == 0xf) { /* STOP */
 						if (++stopCount >= 4)
 							break;
@@ -847,6 +847,10 @@ static void RedrawScreen(){
  */
 int main(int argc,char **argv)
 {
+    /* Initializing start time */
+    int start_time = time(NULL);
+    printf("Start time is: %d", start_time);
+
 	uintptr_t i,x,y;
   
 	/* Buffer used for execution output of candidate offspring */
@@ -913,11 +917,8 @@ int main(int argc,char **argv)
 	for(;;) {
 
 #ifdef STOP_AT
-		if (clock >= STOP_AT) {		/* Stop at STOP_AT if defined */
-#ifdef DUMP_FREQUENCY
-			doDump(clock);		/* Also do a final dump if dumps are enabled */
-#endif /* DUMP_FREQUENCY */
-			fprintf(stderr,"[QUIT] STOP_AT clock value reached\n");
+		if (time(NULL) - start_time >= STOP_AT) {		/* Stop at STOP_AT if defined */
+			fprintf(stderr,"[QUIT] STOP_AT value of %d seconds reached\n", STOP_AT);
 			break;
 		}
 #endif /* STOP_AT */
