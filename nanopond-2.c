@@ -857,7 +857,7 @@ int main(int argc,char **argv)
 	uintptr_t outputBuf[POND_DEPTH_SYSWORDS];
   
 	/* Seed and init the random number generator */
-	init_genrand(time(NULL));
+	init_genrand(1234567890);
 	for(i=0;i<1024;++i)
 		getRandom();
 
