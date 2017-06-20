@@ -661,7 +661,7 @@ static void reportCell(FILE *file, struct Cell *cell) {
 
 /**
  * Get a neighbor in the pond in direction cell is facing
- *y/
+ */
 static inline struct Cell *getNeighbor(const uintptr_t x,const uintptr_t y,const uintptr_t dir)
 {
 	/* Space is toroidal; it wraps at edges */
@@ -979,7 +979,7 @@ int main(int argc,char **argv)
 		if (!(clock % INFLOW_FREQUENCY)) {
 			x = getRandom() % POND_SIZE_X;
 			y = getRandom() % POND_SIZE_Y;
-			currCell = cellArray[x][y];
+			currCell &= cellArray[x][y];
 			currCell->ID = cellIDCounter;
 			currCell->parentID = 0;
 			currCell->lineage = cellIDCounter;
