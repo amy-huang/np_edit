@@ -661,6 +661,43 @@ static void reportCell(FILE *file, struct Cell *cell) {
 }
 #endif
 
+/* Seeds a random cell in a pond, zeroing out its genome and giving it some energy */
+static void seedRandomCell(struct Cell cellArray) {
+		/* Introduce a random cell somewhere with a given energy level */
+		/* This is called seeding, and introduces both energy and
+		* entropy into the substrate. This happens every INFLOW_FREQUENCY
+		* clock ticks. */
+/*
+			int x = getRandom() % POND_SIZE_X;
+			int y = getRandom() % POND_SIZE_Y;
+			struct Cell currCell = &cellArray[x][y];
+			currCell->ID = cellIDCounter;
+			currCell->parentID = 0;
+			currCell->lineage = cellIDCounter;
+			currCell->generation = 0;
+#ifdef INFLOW_RATE_VARIATION
+			currCell->energy += INFLOW_RATE_BASE + (getRandom() % INFLOW_RATE_VARIATION);
+#else
+			currCell->energy += INFLOW_RATE_BASE;
+*/
+
+// #endif /* INFLOW_RATE_VARIATION */
+/*			for(i=0;i<MAX_WORDS_GENOME;++i) 
+				currCell->genome[i] = getRandom();
+*/
+      /* Update the random cell on SDL screen if viz is enabled */
+#ifdef USE_SDL_NOTYET
+			//FIXME
+/*			if (SDL_MUSTLOCK(screen))
+				SDL_LockSurface(screen);
+			((uint8_t *)screen->pixels)[x + (y * sdlPitch)] = getColor(currCell);
+			if (SDL_MUSTLOCK(screen))
+				SDL_UnlockSurface(screen);
+*/
+#endif /* USE_SDL */
+}
+
+
 /**
  * Get a neighbor in the pond in direction cell is facing
  */
@@ -962,56 +999,33 @@ int main(int argc,char **argv)
 
 	for(;;) {
 
-#ifdef STOP_AT
-		if (time(NULL) - start_time >= STOP_AT) {		/* If STOP_AT value is defined, stop program execution after that many seconds */
+        /* If STOP_AT value is defined, stop program execution after that many seconds */
+    #ifdef STOP_AT
+		if (time(NULL) - start_time >= STOP_AT) {		
 			fprintf(stderr,"[QUIT] STOP_AT value of %d seconds reached\n", STOP_AT);
 			break;
 		}
-#endif /* STOP_AT */
+    #endif 
 
 		/* Increment clock and print out updates every UPDATE_FREQUENCY amount of main loop cycles */
 		/* Clock is incremented at the start, so it starts at 1 */
 		if (!(++clock % UPDATE_FREQUENCY)) {
 			doUpdate(clock);
-#ifdef USE_SDL
-		updateScreen();
+            // Update screen if using SDL display
+        #ifdef USE_SDL
+		    updateScreen();
+		    RedrawScreen();	// Really inefficient, but let's see if it works.
+        #endif 
+        }
 
-			/* SDL display is also refreshed every UPDATE_FREQUENCY */
-/*			while (SDL_PollEvent(&sdlEvent)) {
-				if (sdlEvent.type == SDL_QUIT) {
-					fprintf(stderr,"[QUIT] Quit signal received!\n");
-					exit(0);
-				} else { 
-					if (sdlEvent.type == SDL_MOUSEBUTTONDOWN) {
-						switch (sdlEvent.button.button) {
-							case SDL_BUTTON_LEFT:
-								fprintf(stderr,"[INTERFACE] Genome of cell at (%d, %d):\n",sdlEvent.button.x, sdlEvent.button.y);
-								reportCell(stderr, cellArray[sdlEvent.button.x][sdlEvent.button.y]);
-								break;
-							case SDL_BUTTON_RIGHT:
-								colorScheme = (colorScheme + 1) % MAX_COLOR_SCHEME;
-								fprintf(stderr,"[INTERFACE] Switching to color scheme \"%s\".\n",colorSchemeName[colorScheme]);
-								RedrawScreen();
-								break;
-						}
-					}
-				}
-
-			}
-*/
-
-
-#ifdef USE_SDL
-		RedrawScreen();	// Really inefficient, but let's see if it works.
-#endif
-#endif /* USE_SDL */
-		}
-
-#ifdef REPORT_FREQUENCY
-		/* Periodically report the viable population if defined */
+        /* Print out reports if frequency for how often is defined */
+    #ifdef REPORT_FREQUENCY
 		if (!(clock % REPORT_FREQUENCY))
 			doReport(clock);
-#endif /* REPORT_FREQUENCY */
+    #endif 
+
+
+
 
 		/* Introduce a random cell somewhere with a given energy level */
 		/* This is called seeding, and introduces both energy and
@@ -1032,6 +1046,7 @@ int main(int argc,char **argv)
 #endif /* INFLOW_RATE_VARIATION */
 			for(i=0;i<MAX_WORDS_GENOME;++i) 
 				currCell->genome[i] = getRandom();
+
 			++cellIDCounter;
       
       /* Update the random cell on SDL screen if viz is enabled */
@@ -1044,7 +1059,11 @@ int main(int argc,char **argv)
 				SDL_UnlockSurface(screen);
 #endif /* USE_SDL */
 		}
-    
+  
+
+
+
+
 		/* Pick a random cell to execute */
 		x = getRandom() % POND_SIZE_X;
 		y = getRandom() % POND_SIZE_Y;
