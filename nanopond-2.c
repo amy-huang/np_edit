@@ -451,7 +451,7 @@ struct Cell {
 	uintptr_t genome[MAX_WORDS_GENOME];/* four-bit instructions packed into machine-size words */
 };
 
-struct Cell pond[POND_SIZE_X][POND_SIZE_Y];/* The pond is a 2D array of cells */
+struct Cell cellArray[POND_SIZE_X][POND_SIZE_Y];/* The pond is a 2D array of Cell structs */
 
 /* Currently selected color scheme */
 enum { KINSHIP,LINEAGE,MAX_COLOR_SCHEME } colorScheme = KINSHIP;
@@ -503,7 +503,7 @@ static void doUpdate(const uint64_t clock)
   
 	for(x=0;x<POND_SIZE_X;++x) {
 		for(y=0;y<POND_SIZE_Y;++y) {
-			struct Cell *const c = &pond[x][y];
+			struct Cell *const c = &cellArray[x][y];
 			if (c->energy) {
 				++totalActiveCells;
 				totalEnergy += (uint64_t)c->energy;
@@ -582,7 +582,7 @@ static void doReport(const uint64_t clock)
   
 	for(x=0;x<POND_SIZE_X;++x) {
 		for(y=0;y<POND_SIZE_Y;++y) {
-			currCell = &pond[x][y];
+			currCell = &cellArray[x][y];
 			if (currCell->energy&&(currCell->generation > 2)) {
 				fprintf(d,"ID: %lu, parent ID: %lu, lineage: %lu, generation: %lu\n",
 					(uint64_t)currCell->ID,
@@ -634,7 +634,7 @@ static void reportCell(FILE *file, struct Cell *cell) {
 		stopCount = 0;
 		for(i=0;i<MAX_NUM_INSTR;++i) {
 			inst = (cell->genome[wordPtr] >> shiftPtr) & 0xf;
-			/* Four STOP instructions in a row is considered the end.
+			/* Four STOP instructions in a row is considered the end of the genome.
 			* The probability of this being wrong is *very* small, and
 			* could only occur if you had four STOPs in a row inside
 			* a LOOP/REP pair that's always false. In any case, this
@@ -660,18 +660,18 @@ static void reportCell(FILE *file, struct Cell *cell) {
 #endif
 
 /**
- * Get a neighbor in the pond
- */
+ * Get a neighbor in the pond in direction cell is facing
+ *y/
 static inline struct Cell *getNeighbor(const uintptr_t x,const uintptr_t y,const uintptr_t dir)
 {
 	/* Space is toroidal; it wraps at edges */
 	switch(dir) {
-		case N_LEFT: 	return (x) ? &pond[x-1][y] : &pond[POND_SIZE_X-1][y];
-		case N_RIGHT: 	return (x < (POND_SIZE_X-1)) ? &pond[x+1][y] : &pond[0][y];
-		case N_UP: 	return (y) ? &pond[x][y-1] : &pond[x][POND_SIZE_Y-1];
-		case N_DOWN: 	return (y < (POND_SIZE_Y-1)) ? &pond[x][y+1] : &pond[x][0];
+		case N_LEFT: 	return (x) ? cellArray[x-1][y] : cellArray[POND_SIZE_X-1][y];
+		case N_RIGHT: 	return (x < (POND_SIZE_X-1)) ? cellArray[x+1][y] : cellArray[0][y];
+		case N_UP: 	return (y) ? cellArray[x][y-1] : cellArray[x][POND_SIZE_Y-1];
+		case N_DOWN: 	return (y < (POND_SIZE_Y-1)) ? cellArray[x][y+1] : cellArray[x][0];
 	}
-	return &pond[x][y]; /* This should never be reached */
+	return cellArray[x][y]; /* This should never be reached */
 }
 
 /**
@@ -749,6 +749,9 @@ static inline uint32_t getColor(struct Cell *c)
 	}
 	return 0; /* Cells with no energy are black */
 }
+
+/***** START SDL FUNCTIONS *****/
+
 #ifdef USE_SDL
 static SDL_Event       sdlEvent;               // keyboard, mouse, etc.
 static SDL_Window*     sdlWindow;              //  
@@ -832,7 +835,7 @@ static void RedrawScreen(){
 	for (y=0;y<POND_SIZE_Y;++y) {
 		dst = (Uint32*)((Uint8*)myPixels + y * sdlPitch);
 		for (x=0;x<POND_SIZE_X;++x)
-			*dst++ = getColor(&pond[x][y]);
+			*dst++ = getColor(cellArray[x][y]);
 	}
 
 	SDL_UnlockTexture( sdlTexture );
@@ -841,27 +844,35 @@ static void RedrawScreen(){
 	SDL_RenderPresent(sdlRenderer);
 }
 
+/***** END SDL FUNCTIONS *****/
+
+
 #endif
 /**
  * Main method
  */
 int main(int argc,char **argv)
 {
-    /* Initializing start time */
-    int start_time = time(NULL);
-    printf("Start time is: %d", start_time);
-
 	uintptr_t i,x,y;
+    
+	/* Initializing start time */
+    	int start_time = time(NULL);
+    	printf("Start time is: %d", start_time);
+
   
-	/* Buffer used for execution output of candidate offspring */
+	/* Used as part of writing and reading genome instructions */
 	uintptr_t outputBuf[MAX_WORDS_GENOME];
   
-	/* Seed and init the random number generator */
+	/* 
+ 	* Seed and initialize the random number generator. Passing in a constant seed number 
+ 	* to init_genrand will result in the same pond being made every time np is run.
+ 	* To make a pseudo-random pond, pass in time(NULL) instead.
+ 	*/
 	init_genrand(1234567890);
 	for(i=0;i<1024;++i)
 		getRandom();
 
-	/* Reset per-update stat counters */
+	/* Reset per-update stat counters that print while program is running onscreen. */
 	for(x=0;x<sizeof(statCounters);++x)
 		((uint8_t *)&statCounters)[x] = (uint8_t)0;
   
@@ -870,25 +881,25 @@ int main(int argc,char **argv)
 	* to 0xffff... */
 	for(x=0;x<POND_SIZE_X;++x) {
 		for(y=0;y<POND_SIZE_Y;++y) {
-			pond[x][y].ID = 0;
-			pond[x][y].parentID = 0;
-			pond[x][y].lineage = 0;
-			pond[x][y].generation = 0;
-			pond[x][y].energy = 0;
+			cellArray[x][y].ID = 0;
+			cellArray[x][y].parentID = 0;
+			cellArray[x][y].lineage = 0;
+			cellArray[x][y].generation = 0;
+			cellArray[x][y].energy = 0;
 			for(i=0;i<MAX_WORDS_GENOME;++i)
-				pond[x][y].genome[i] = ~((uintptr_t)0);
+				cellArray[x][y].genome[i] = ~((uintptr_t)0);
 		}
 	}
   
 	uint64_t clock = 0;		/* Clock is incremented on each core loop */
   
-	uint64_t cellIdCounter = 0;	/* This is used to generate unique cell IDs */
+	uint64_t cellIDCounter = 0;	/* This is used to generate unique cell IDs */
   
 	uintptr_t currentWord,wordPtr,shiftPtr,inst,tmp;/* Miscellaneous variables */
 	struct Cell *currCell,*neighborCell;			/* used in the loop */
   
-	uintptr_t ptr_wordPtr;	/* Virtual machine memory pointer cell_register (which */
-	uintptr_t ptr_shiftPtr; /* exists in two parts... read the code below...) */
+	uintptr_t cell_wordPtr;	/* Virtual machine memory pointer cell_register (which */
+	uintptr_t cell_shiftPtr; /* exists in two parts... read the code below...) */
 	  
 	uintptr_t cell_register;			/* The main "cell_register" */
 	uintptr_t cell_direction;		/* Which way is the cell cell_direction? */
@@ -938,7 +949,7 @@ int main(int argc,char **argv)
 						switch (sdlEvent.button.button) {
 							case SDL_BUTTON_LEFT:
 								fprintf(stderr,"[INTERFACE] Genome of cell at (%d, %d):\n",sdlEvent.button.x, sdlEvent.button.y);
-								reportCell(stderr, &pond[sdlEvent.button.x][sdlEvent.button.y]);
+								reportCell(stderr, cellArray[sdlEvent.button.x][sdlEvent.button.y]);
 								break;
 							case SDL_BUTTON_RIGHT:
 								colorScheme = (colorScheme + 1) % MAX_COLOR_SCHEME;
@@ -968,10 +979,10 @@ int main(int argc,char **argv)
 		if (!(clock % INFLOW_FREQUENCY)) {
 			x = getRandom() % POND_SIZE_X;
 			y = getRandom() % POND_SIZE_Y;
-			currCell = &pond[x][y];
-			currCell->ID = cellIdCounter;
+			currCell = cellArray[x][y];
+			currCell->ID = cellIDCounter;
 			currCell->parentID = 0;
-			currCell->lineage = cellIdCounter;
+			currCell->lineage = cellIDCounter;
 			currCell->generation = 0;
 #ifdef INFLOW_RATE_VARIATION
 			currCell->energy += INFLOW_RATE_BASE + (getRandom() % INFLOW_RATE_VARIATION);
@@ -980,7 +991,7 @@ int main(int argc,char **argv)
 #endif /* INFLOW_RATE_VARIATION */
 			for(i=0;i<MAX_WORDS_GENOME;++i) 
 				currCell->genome[i] = getRandom();
-			++cellIdCounter;
+			++cellIDCounter;
       
       /* Update the random cell on SDL screen if viz is enabled */
 #ifdef USE_SDL_NOTYET
@@ -996,13 +1007,13 @@ int main(int argc,char **argv)
 		/* Pick a random cell to execute */
 		x = getRandom() % POND_SIZE_X;
 		y = getRandom() % POND_SIZE_Y;
-		currCell = &pond[x][y];
+		currCell = cellArray[x][y];
 
 		/* Reset the state of the VM prior to execution */
 		for(i=0;i<MAX_WORDS_GENOME;++i)
 			outputBuf[i] = ~((uintptr_t)0); /* ~0 == 0xfffff... */
-		ptr_wordPtr = 0;
-		ptr_shiftPtr = 0;
+		cell_wordPtr = 0;
+		cell_shiftPtr = 0;
 		cell_register = 0;
 		loopStackPtr = 0;
 		wordPtr = EXEC_START_WORD;
@@ -1061,26 +1072,26 @@ int main(int argc,char **argv)
 				switch(inst) {
 					case 0x0: /* ZERO: Zero VM state cell_registers */
 						cell_register = 0;
-						ptr_wordPtr = 0;
-						ptr_shiftPtr = 0;
+						cell_wordPtr = 0;
+						cell_shiftPtr = 0;
 						cell_direction = 0;
 						break;
 					case 0x1: /* FWD: Increment the pointer (wrap at end) */
-						if ((ptr_shiftPtr += 4) >= BITS_IN_WORD) {
-							if (++ptr_wordPtr >= MAX_WORDS_GENOME)
-								ptr_wordPtr = 0;
-							ptr_shiftPtr = 0;
+						if ((cell_shiftPtr += 4) >= BITS_IN_WORD) {
+							if (++cell_wordPtr >= MAX_WORDS_GENOME)
+								cell_wordPtr = 0;
+							cell_shiftPtr = 0;
 						}
 						break;
 					case 0x2: /* BACK: Decrement the pointer (wrap at beginning) */
-						if (ptr_shiftPtr)
-							ptr_shiftPtr -= 4;
+						if (cell_shiftPtr)
+							cell_shiftPtr -= 4;
 						else {
-							if (ptr_wordPtr)
-								--ptr_wordPtr;
+							if (cell_wordPtr)
+								--cell_wordPtr;
 							else 
-								ptr_wordPtr = MAX_WORDS_GENOME - 1;
-							ptr_shiftPtr = BITS_IN_WORD - 4;
+								cell_wordPtr = MAX_WORDS_GENOME - 1;
+							cell_shiftPtr = BITS_IN_WORD - 4;
 						}
 						break;
 					case 0x3: /* INC: Increment the cell_register */
@@ -1090,19 +1101,19 @@ int main(int argc,char **argv)
 						cell_register = (cell_register - 1) & 0xf;
 						break;
 					case 0x5: /* READG: Read into the cell_register from genome */
-						cell_register = (currCell->genome[ptr_wordPtr] >> ptr_shiftPtr) & 0xf;
+						cell_register = (currCell->genome[cell_wordPtr] >> cell_shiftPtr) & 0xf;
 						break;
 					case 0x6: /* WRITEG: Write out from the cell_register to genome */
-						currCell->genome[ptr_wordPtr] &= ~(((uintptr_t)0xf) << ptr_shiftPtr);
-						currCell->genome[ptr_wordPtr] |= cell_register << ptr_shiftPtr;
+						currCell->genome[cell_wordPtr] &= ~(((uintptr_t)0xf) << cell_shiftPtr);
+						currCell->genome[cell_wordPtr] |= cell_register << cell_shiftPtr;
 						currentWord = currCell->genome[wordPtr]; /* Must refresh in case this changed! */
 						break;
 					case 0x7: /* READB: Read into the cell_register from buffer */
-						cell_register = (outputBuf[ptr_wordPtr] >> ptr_shiftPtr) & 0xf;
+						cell_register = (outputBuf[cell_wordPtr] >> cell_shiftPtr) & 0xf;
 						break;
 					case 0x8: /* WRITEB: Write out from the cell_register to buffer */
-						outputBuf[ptr_wordPtr] &= ~(((uintptr_t)0xf) << ptr_shiftPtr);
-						outputBuf[ptr_wordPtr] |= cell_register << ptr_shiftPtr;
+						outputBuf[cell_wordPtr] &= ~(((uintptr_t)0xf) << cell_shiftPtr);
+						outputBuf[cell_wordPtr] |= cell_register << cell_shiftPtr;
 						break;
 					case 0x9: /* LOOP: Jump forward to matching REP if cell_register is zero */
 						if (cell_register) {
@@ -1152,11 +1163,11 @@ int main(int argc,char **argv)
 							/* Filling first two words with 0xfffff... is enough */
 							neighborCell->genome[0] = ~((uintptr_t)0);
 							neighborCell->genome[1] = ~((uintptr_t)0);
-							neighborCell->ID = cellIdCounter;
+							neighborCell->ID = cellIDCounter;
 							neighborCell->parentID = 0;
-							neighborCell->lineage = cellIdCounter;
+							neighborCell->lineage = cellIDCounter;
 							neighborCell->generation = 0;
-							++cellIdCounter;
+							++cellIDCounter;
 						} else {
 							if (neighborCell->generation > 2) {
 								tmp = currCell->energy / FAILED_KILL_PENALTY;
@@ -1209,7 +1220,7 @@ int main(int argc,char **argv)
 					++statCounters.viableCellsReplaced;
                 
                 // Generate new cell ID and set parent ID, lineage, generation accordingly
-				neighborCell->ID = ++cellIdCounter;
+				neighborCell->ID = ++cellIDCounter;
 				neighborCell->parentID = currCell->ID;
 				neighborCell->lineage = currCell->lineage; /* Lineage is copied in offspring */
 				neighborCell->generation = currCell->generation + 1;
@@ -1226,24 +1237,24 @@ int main(int argc,char **argv)
 			SDL_LockSurface(screen);
 		((uint8_t *)screen->pixels)[x + (y * sdlPitch)] = getColor(currCell);
 		if (x) {
-			((uint8_t *)screen->pixels)[(x-1) + (y * sdlPitch)] = getColor(&pond[x-1][y]);
+			((uint8_t *)screen->pixels)[(x-1) + (y * sdlPitch)] = getColor(cellArray[x-1][y]);
 			if (x < (POND_SIZE_X-1))
-				((uint8_t *)screen->pixels)[(x+1) + (y * sdlPitch)] = getColor(&pond[x+1][y]);
+				((uint8_t *)screen->pixels)[(x+1) + (y * sdlPitch)] = getColor(cellArray[x+1][y]);
 			else 
-				((uint8_t *)screen->pixels)[y * sdlPitch] = getColor(&pond[0][y]);
+				((uint8_t *)screen->pixels)[y * sdlPitch] = getColor(cellArray[0][y]);
 		} else {
-			((uint8_t *)screen->pixels)[(POND_SIZE_X-1) + (y * sdlPitch)] = getColor(&pond[POND_SIZE_X-1][y]);
-			((uint8_t *)screen->pixels)[1 + (y * sdlPitch)] = getColor(&pond[1][y]);
+			((uint8_t *)screen->pixels)[(POND_SIZE_X-1) + (y * sdlPitch)] = getColor(cellArray[POND_SIZE_X-1][y]);
+			((uint8_t *)screen->pixels)[1 + (y * sdlPitch)] = getColor(cellArray[1][y]);
 		}
 		if (y) {
-			((uint8_t *)screen->pixels)[x + ((y-1) * sdlPitch)] = getColor(&pond[x][y-1]);
+			((uint8_t *)screen->pixels)[x + ((y-1) * sdlPitch)] = getColor(cellArray[x][y-1]);
 			if (y < (POND_SIZE_Y-1))
-				((uint8_t *)screen->pixels)[x + ((y+1) * sdlPitch)] = getColor(&pond[x][y+1]);
+				((uint8_t *)screen->pixels)[x + ((y+1) * sdlPitch)] = getColor(cellArray[x][y+1]);
 			else 
-				((uint8_t *)screen->pixels)[x] = getColor(&pond[x][0]);
+				((uint8_t *)screen->pixels)[x] = getColor(cellArray[x][0]);
 		} else {
-			((uint8_t *)screen->pixels)[x + ((POND_SIZE_Y-1) * sdlPitch)] = getColor(&pond[x][POND_SIZE_Y-1]);
-			((uint8_t *)screen->pixels)[x + sdlPitch] = getColor(&pond[x][1]);
+			((uint8_t *)screen->pixels)[x + ((POND_SIZE_Y-1) * sdlPitch)] = getColor(cellArray[x][POND_SIZE_Y-1]);
+			((uint8_t *)screen->pixels)[x + sdlPitch] = getColor(cellArray[x][1]);
 		}
 		if (SDL_MUSTLOCK(screen))
 			SDL_UnlockSurface(screen);
