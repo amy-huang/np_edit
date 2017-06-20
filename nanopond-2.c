@@ -666,8 +666,8 @@ static void reportCell(FILE *file, struct Cell *cell) {
  */
 static inline struct Cell *getNeighbor(struct Cell *cell, const uintptr_t dir)
 {
-	int x = cell.x;
-	int y = cell.y;
+	int x = cell->x;
+	int y = cell->y;
 
 	/* Space is toroidal; it wraps at edges */
 	switch(dir) {
