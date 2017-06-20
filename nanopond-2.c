@@ -517,7 +517,7 @@ static void doUpdate(const uint64_t clock)
   
 	/* Look here to get the columns in the CSV output */
 	/* The first five are here and are self-explanatory */
-	printf("\nclock: %llu   total energy: %llu   total active cells: %lu  total viable replicators: %lu   max generation: %lu   viable cells replaced: %lu   viable cells killed: %lu   viable cell shares: %lu\n",
+	printf("\nclock: %llu   total energy: %llu   total active cells: %llu  total viable replicators: %llu   max generation: %llu   viable cells replaced: %llu   viable cells killed: %llu   viable cell shares: %llu\n",
 		(uint64_t)clock,
 		(uint64_t)totalEnergy,
 		(uint64_t)totalActiveCells,
@@ -571,7 +571,7 @@ static void doReport(const uint64_t clock)
 	uintptr_t x,y,wordPtr,shiftPtr,inst,stopCount,i;
 	struct Cell *currCell;
   
-	sprintf(buf,"0%lu.report.csv",clock);
+	sprintf(buf,"0%llu.report.csv",clock);
 	d = fopen(buf,"w");
 	if (!d) {
 		fprintf(stderr,"[WARNING] Could not open %s for writing.\n",buf);
@@ -584,7 +584,7 @@ static void doReport(const uint64_t clock)
 		for(y=0;y<POND_SIZE_Y;++y) {
 			currCell = &cellArray[x][y];
 			if (currCell->energy&&(currCell->generation > 2)) {
-				fprintf(d,"ID: %lu, parent ID: %lu, lineage: %lu, generation: %lu\n",
+				fprintf(d,"ID: %llu, parent ID: %llu, lineage: %llu, generation: %llu\n",
 					(uint64_t)currCell->ID,
 					(uint64_t)currCell->parentID,
 					(uint64_t)currCell->lineage,
