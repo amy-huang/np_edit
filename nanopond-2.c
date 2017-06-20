@@ -841,7 +841,7 @@ static void RedrawScreen(){
 	for (y=0;y<POND_SIZE_Y;++y) {
 		dst = (Uint32*)((Uint8*)myPixels + y * sdlPitch);
 		for (x=0;x<POND_SIZE_X;++x)
-			*dst++ = getColor(cellArray[x][y]);
+			*dst++ = getColor(&cellArray[x][y]);
 	}
 
 	SDL_UnlockTexture( sdlTexture );
@@ -860,7 +860,7 @@ static void updateScreen() {
 						switch (sdlEvent.button.button) {
 							case SDL_BUTTON_LEFT:
 								fprintf(stderr,"[INTERFACE] Genome of cell at (%d, %d):\n",sdlEvent.button.x, sdlEvent.button.y);
-								reportCell(stderr, cellArray[sdlEvent.button.x][sdlEvent.button.y]);
+								reportCell(stderr, &cellArray[sdlEvent.button.x][sdlEvent.button.y]);
 								break;
 							case SDL_BUTTON_RIGHT:
 								colorScheme = (colorScheme + 1) % MAX_COLOR_SCHEME;
