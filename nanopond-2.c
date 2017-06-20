@@ -666,6 +666,7 @@ static void reportCell(FILE *file, struct Cell *cell) {
  */
 static inline struct Cell *getNeighbor(struct Cell *cell, const uintptr_t dir)
 {
+	// Storing cell's x and y coordinates
 	int x = cell->x;
 	int y = cell->y;
 
@@ -849,6 +850,30 @@ static void RedrawScreen(){
 	SDL_RenderPresent(sdlRenderer);
 }
 
+static void updateScreen() {
+			while (SDL_PollEvent(&sdlEvent)) {
+				if (sdlEvent.type == SDL_QUIT) {
+					fprintf(stderr,"[QUIT] Quit signal received!\n");
+					exit(0);
+				} else { 
+					if (sdlEvent.type == SDL_MOUSEBUTTONDOWN) {
+						switch (sdlEvent.button.button) {
+							case SDL_BUTTON_LEFT:
+								fprintf(stderr,"[INTERFACE] Genome of cell at (%d, %d):\n",sdlEvent.button.x, sdlEvent.button.y);
+								reportCell(stderr, cellArray[sdlEvent.button.x][sdlEvent.button.y]);
+								break;
+							case SDL_BUTTON_RIGHT:
+								colorScheme = (colorScheme + 1) % MAX_COLOR_SCHEME;
+								fprintf(stderr,"[INTERFACE] Switching to color scheme \"%s\".\n",colorSchemeName[colorScheme]);
+								RedrawScreen();
+								break;
+						}
+					}
+				}
+			}
+
+}
+
 /***** END SDL FUNCTIONS *****/
 
 
@@ -931,23 +956,28 @@ int main(int argc,char **argv)
 	RedrawScreen();
 #endif /* USE_SDL */
 
-	/* Main loop */
+
+
+	/***** START MAIN LOOP *****/
+
 	for(;;) {
 
 #ifdef STOP_AT
-		if (time(NULL) - start_time >= STOP_AT) {		/* Stop at STOP_AT if defined */
+		if (time(NULL) - start_time >= STOP_AT) {		/* If STOP_AT value is defined, stop program execution after that many seconds */
 			fprintf(stderr,"[QUIT] STOP_AT value of %d seconds reached\n", STOP_AT);
 			break;
 		}
 #endif /* STOP_AT */
 
-		/* Increment clock and run updates periodically */
+		/* Increment clock and print out updates every UPDATE_FREQUENCY amount of main loop cycles */
 		/* Clock is incremented at the start, so it starts at 1 */
 		if (!(++clock % UPDATE_FREQUENCY)) {
 			doUpdate(clock);
 #ifdef USE_SDL
+		updateScreen();
+
 			/* SDL display is also refreshed every UPDATE_FREQUENCY */
-			while (SDL_PollEvent(&sdlEvent)) {
+/*			while (SDL_PollEvent(&sdlEvent)) {
 				if (sdlEvent.type == SDL_QUIT) {
 					fprintf(stderr,"[QUIT] Quit signal received!\n");
 					exit(0);
@@ -966,7 +996,11 @@ int main(int argc,char **argv)
 						}
 					}
 				}
+
 			}
+*/
+
+
 #ifdef USE_SDL
 		RedrawScreen();	// Really inefficient, but let's see if it works.
 #endif
