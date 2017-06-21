@@ -239,7 +239,7 @@
 /* ----------------------------------------------------------------------- */
 
 /* Iteration to stop at. Comment this out to run forever. */
-#define STOP_AT 100
+//#define STOP_AT 100
 
 /* Frequency of comprehensive updates-- lower values will provide more
  * info while slowing down the simulation. Higher values will give less
@@ -255,10 +255,11 @@
  * four-bit value. */
 #define REPORT_FREQUENCY 10000000
 
-/* Mutation rate -- range is from 0 (none) to 0xffffffff (all mutations!) */
-/* To get it from a float probability from 0.0 to 1.0, multiply it by
+/* Mutation rate -- range is from 0 (none) to 0xffffffff (all mutations--
+ * every instruction executed is randomly chosen, regardless of genome!) */
+/* To get it from a float probability p from 0.0 to 1.0, multiply it by
  * 4294967295 (0xffffffff) and round. */
-#define MUTATION_RATE 21475 /* p=~0.000005 */
+#define MUTATION_RATE 400 /* p = 21475 / 4294967295, about 0.000005 */
 
 /* How frequently should random cells / energy be introduced?
  * Making this too high makes things very chaotic. Making it too low
@@ -415,14 +416,14 @@ static inline uint32_t genrand_int32() {
 }
 
 /* ----------------------------------------------------------------------- */
-
-/* Pond depth in machine-size words.  This is calculated from
- * MAX_NUM_INSTR and the size of the machine word, which varies by machine. (The multiplication
- * by two is due to the fact that there are two four-bit values in
- * each eight-bit byte.) */
+/*
+ * Max number of machine words (a data unit of processing) it takes to store/process (?) a genome.
+ * The size of an uintptr_t is the size of the machine word in bytes, and each byte has 2 chunks of
+ * 4 bits. Each instruction is 4 bits.
+ */
 #define MAX_WORDS_GENOME (MAX_NUM_INSTR / (sizeof(uintptr_t) * 2))
 
-/* Number of bits in a machine-size word */
+/* Number of bits in a machine-size word (Size of a word is in bytes; there are 8 bits in a byte) */
 #define BITS_IN_WORD (sizeof(uintptr_t) * 8)
 
 /* Constants representing neighbors in the 2D grid. */
@@ -779,7 +780,7 @@ static inline uint32_t getColor(struct Cell *c)
 					}
 					/* For the hash-value use a wrapped around sum of the sum of all
 					* commands and the length of the genome. The + 64 makes the colors a bit brighter. */
-					return (uint32_t)((sum % 192) + 64)*256*256*256;
+					return (uint32_t)((sum % (120 + 2048)) + 64)*256*256;
 				}
 				return 0;
 			case LINEAGE:
@@ -914,9 +915,17 @@ static void updateScreen() {
 /***** END SDL FUNCTIONS *****/
 
 
+/***** START IO FUNCTIONS *****/
+
+static void takeGenome() {
+
+}
+
+/***** END IO FUNCTIONS *****/
+
 #endif
 /**
- * Main method
+ * Main method. argc is number of arguments and **argv is a pointer to an array.
  */
 int main(int argc,char **argv)
 {
@@ -1093,8 +1102,11 @@ int main(int argc,char **argv)
 		/* Keep track of how many cells have been executed */
 		statCounters.cellExecutions += 1.0;
 
-		/* Core execution loop */
-		while (currCell->energy&&(!stop)) {
+
+
+/***** START CURRENT CELL EXECUTION *****/
+        
+        while (currCell->energy&&(!stop)) {
 			/* Get the next instruction */
 			inst = (currentWord >> shiftPtr) & 0xf;
       
@@ -1104,8 +1116,8 @@ int main(int argc,char **argv)
 			* it can have all manner of different effects on the end result of
 			* replication: insertions, deletions, duplications of entire
 			* ranges of the genome, etc. */
-			if ((getRandom() & 0xffffffff) < MUTATION_RATE) {
-				tmp = getRandom(); /* Call getRandom() only once for speed */
+			tmp = getRandom(); /* Call getRandom() only once for speed */
+			if ((tmp & 0xffffffff) < MUTATION_RATE) { // bitwise AND to make sure 32 bits?
 				if (tmp & 0x80) /* Check for the 8th bit to get random boolean */
 					inst = tmp & 0xf; /* Only the first four bits are used here */
 				else 
@@ -1201,7 +1213,7 @@ int main(int argc,char **argv)
 					case 0xb: /* TURN: Turn in the direction specified by cell_register */
 						cell_direction = cell_register & 3;
 						break;
-					case 0xc: /* XCHG: Skip next instruction and exchange value of cell_register with it */
+					case 0xc: /* EXCHANGE: Skip next instruction and exchange value of cell_register with it */
 						if ((shiftPtr += 4) >= BITS_IN_WORD) {
 							if (++wordPtr >= MAX_WORDS_GENOME) {
 								wordPtr = EXEC_START_WORD;
@@ -1267,6 +1279,9 @@ int main(int argc,char **argv)
 				currentWord = currCell->genome[wordPtr];
 			}
 		} //end core execution loop
+
+/***** END CURRENT CELL EXECUTION *****/
+        
     
 		/* Copy outputBuf into neighbor if access is permitted and there
 		* is energy. There is no need to copy to a cell with no energy, since anything copied there
