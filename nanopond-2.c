@@ -239,7 +239,7 @@
 /* ----------------------------------------------------------------------- */
 
 /* Iteration to stop at. Comment this out to run forever. */
-//#define STOP_AT 100
+#define STOP_AT 1
 
 /* Frequency of comprehensive updates-- lower values will provide more
  * info while slowing down the simulation. Higher values will give less
@@ -911,25 +911,40 @@ static void updateScreen() {
 			}
 
 }
+#endif
 
 /***** END SDL FUNCTIONS *****/
 
 
 /***** START IO FUNCTIONS *****/
 
-static void takeGenome() {
-
+static void takeGenome(char *genomeString) {
+    printf("genome taken is: ");
+    int i;
+    printf("%s", genomeString);
+    printf("\n");
 }
 
 /***** END IO FUNCTIONS *****/
 
-#endif
+
 /**
  * Main method. argc is number of arguments and **argv is a pointer to an array.
  */
 int main(int argc,char **argv)
 {
 	uintptr_t i,x,y;
+   
+
+
+    for (i = 0; i < argc; i++) {
+           printf("argument entered: %s\n", argv[i]);
+    }
+    // If user enters a genome sequence as an argument, then this will test it out.
+    if (argc > 1) {
+        takeGenome(argv[1]);
+        printf("More than 1 argument given\n");
+    }
     
 	/* Initializing start time */
     	int start_time = time(NULL);
