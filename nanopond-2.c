@@ -148,7 +148,7 @@
  * MUTATION_RATE sets their probability. Mutations are random variations
  * with a frequency defined by the mutation rate to the state of the
  * virtual machine while cell genomes are executing. Since cells have
- * to actually make copies of themselves to replicate, this means that
+  actually make copies of themselves to replicate, this means that
  * these copies can vary if mutations have occurred to the state of the
  * VM while copying was in progress.
  *
@@ -239,7 +239,7 @@
 /* ----------------------------------------------------------------------- */
 
 /* Iteration to stop at. Comment this out to run forever. */
-#define STOP_AT 100
+#define STOP_AT 1
 
 /* Frequency of comprehensive updates-- lower values will provide more
  * info while slowing down the simulation. Higher values will give less
@@ -298,10 +298,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
+#include <sys/time.h>
+#include <signal.h>
 #ifdef USE_SDL
 #include <SDL.h>
 #endif /* USE_SDL */
+
+/* ----------------------------------------------------------------------- */
+
+/* TIMER FUNCTION */
+static void timeHandler(struct itimerval tval) {
+#ifdef STOP_AT
+    printf("\n Time is up. %d seconds have passed.\n", STOP_AT);
+#endif    
+    exit(0);
+}
 
 /* ----------------------------------------------------------------------- */
 /* This is the Mersenne Twister by Makoto Matsumoto and Takuji Nishimura   */
@@ -933,10 +944,17 @@ static void takeGenome(char *genomeString) {
  */
 int main(int argc,char **argv)
 {
-	uintptr_t i,x,y;
+    /* set and handle timer */	
+#ifdef STOP_AT
+    struct itimerval tval;
+    tval.it_value.tv_sec = STOP_AT;   // set timer to however many seconds
+
+    (void) signal(SIGALRM, timeHandler);
+    (void) setitimer(ITIMER_REAL, &tval, NULL);
+#endif
+
+    uintptr_t i,x,y;
    
-
-
     for (i = 0; i < argc; i++) {
            printf("argument entered: %s\n", argv[i]);
     }
@@ -946,11 +964,6 @@ int main(int argc,char **argv)
         printf("More than 1 argument given\n");
     }
     
-	/* Initializing start time */
-    	int start_time = time(NULL);
-    	printf("Start time is: %d", start_time);
-
-  
 	/* Used as part of writing and reading genome instructions */
 	uintptr_t outputBuf[MAX_WORDS_GENOME];
   
@@ -1022,15 +1035,6 @@ int main(int argc,char **argv)
 	/***** START MAIN OPEN LOOP *****/
 
 	for(;;) {
-
-        /* If STOP_AT value is defined, stop program execution after that many seconds */
-    #ifdef STOP_AT
-		if (time(NULL) - start_time >= STOP_AT) {		
-			fprintf(stderr,"[QUIT] STOP_AT value of %d seconds reached\n", STOP_AT);
-			break;
-		}
-    #endif 
-
 		/* Increment clock and print out updates every UPDATE_FREQUENCY amount of main loop cycles */
 		/* Clock is incremented at the start, so it starts at 1 */
 		if (!(++clock % UPDATE_FREQUENCY)) {
@@ -1047,9 +1051,6 @@ int main(int argc,char **argv)
 		if (!(clock % REPORT_FREQUENCY))
 			doReport(clock);
     #endif 
-
-
-
 
 		/* Introduce a random cell somewhere with a given energy level */
 		/* This is called seeding, and introduces both energy and
@@ -1204,11 +1205,14 @@ int main(int argc,char **argv)
 						break;
 					case 0x9: /* OPEN LOOP: Jump forward to matching CLOSE LOOP if cell_register is zero */
 						//if (cell_register) {
-							if (whichLoop >= MAX_NUM_INSTR)
-								stop = 1; /* Stack overflow ends execution */
-							else {
+							if (whichLoop >= MAX_NUM_INSTR) {
+								printf("----------------------STACK OVERFLOW ------------------------------------\n");
+                                stop = 1; /* Stack overflow ends execution */
+                            }
+                            else {
 								// Changed to increment loop stack pointer, then record location of current instr
-								++whichLoop;
+								printf("Successful going into loop\n");
+                                ++whichLoop;
 								loopStack_wordPtr[whichLoop] = wordPtr;
 								loopStack_shiftPtr[whichLoop] = shiftPtr;
 							}
@@ -1285,7 +1289,16 @@ int main(int argc,char **argv)
 						stop = 1;
 						break;
 				} // end switch
-			//} // end else 
+			//} // end else
+            
+            // Reset loopStack pointers and arrays
+            
+            //while (whichLoop > 0) {
+            //    loopStack_wordPtr[whichLoop] = 0;
+            //    loopStack_shiftPtr[whichLoop] = 0;
+            //    whichLoop--;
+            //} 
+            
 
 			/* Advance the shift and word pointers, and loop around
 			* to the beginning at the end of the genome. */
