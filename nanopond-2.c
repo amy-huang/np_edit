@@ -1,6 +1,6 @@
 // THIS IS THE FILE I'M EDITING AGAINST THE ORIGINAL
 
-/* *********************************************************************** */
+/* ************************************************************************/
 /*                                                                         */
 /* Nanopond version 2.0 -- A teeny tiny artificial life virtual machine    */
 /* Copyright (C) 2005 Adam Ierymenko - http://www.greythumb.com/people/api */
@@ -97,7 +97,7 @@
  *
  * - Every UPDATE_FREQUENCY clock ticks a line of comma seperated output
  *   is printed to STDOUT with some statistics about what's going on.
- * - Every CLOSE LOOPORT_FREQUENCY clock ticks, all viable replicators (cells whose
+ * - Every REPORT_FREQUENCY clock ticks, all viable replicators (cells whose
  *   generation is >= 2) are reported to a file on disk.
  * - Every INFLOW_FREQUENCY clock ticks a random x,y location is picked,
  *   energy is added (see INFLOW_RATE_MEAN and INFLOW_RATE_DEVIATION)
@@ -239,7 +239,7 @@
 /* ----------------------------------------------------------------------- */
 
 /* Iteration to stop at. Comment this out to run forever. */
-#define STOP_AT 1
+#define STOP_AT 100
 
 /* Frequency of comprehensive updates-- lower values will provide more
  * info while slowing down the simulation. Higher values will give less
@@ -253,13 +253,13 @@
  * semi-human-readable if you look at the big switch() statement
  * in the main loop to see what instruction is signified by each
  * four-bit value. */
-#define CLOSE LOOPORT_FREQUENCY 10000000
+#define REPORT_FREQUENCY 10000000
 
 /* Mutation rate -- range is from 0 (none) to 0xffffffff (all mutations--
  * every instruction executed is randomly chosen, regardless of genome!) */
 /* To get it from a float probability p from 0.0 to 1.0, multiply it by
  * 4294967295 (0xffffffff) and round. */
-#define MUTATION_RATE 400 /* p = 21475 / 4294967295, about 0.000005 */
+#define MUTATION_RATE 21475 /* p = 21475 / 4294967295, about 0.000005 */
 
 /* How frequently should random cells / energy be introduced?
  * Making this too high makes things very chaotic. Making it too low
@@ -1002,7 +1002,7 @@ int main(int argc,char **argv)
 	uintptr_t loopStack_shiftPtr[MAX_NUM_INSTR];	/* Virtual machine loop/rep stack */
 	uintptr_t whichLoop;				/* 				  */
   
-	uintptr_t falseLoopDepth; 		/* If this is nonzero, we're skipping to matching CLOSE LOOP */
+	//uintptr_t falseLoopDepth; 		/* If this is nonzero, we're skipping to matching CLOSE LOOP */
   						/* It is incremented to track the depth of a nested set
    						* of OPEN LOOP/CLOSE LOOP pairs in false state. */
   
@@ -1043,8 +1043,8 @@ int main(int argc,char **argv)
         }
 
         /* Print out reports if frequency for how often is defined */
-    #ifdef CLOSE LOOPORT_FREQUENCY
-		if (!(clock % CLOSE LOOPORT_FREQUENCY))
+    #ifdef REPORT_FREQUENCY
+		if (!(clock % REPORT_FREQUENCY))
 			doReport(clock);
     #endif 
 
@@ -1103,7 +1103,7 @@ int main(int argc,char **argv)
 		wordPtr = EXEC_START_WORD;
 		shiftPtr = EXEC_START_BIT;
 		cell_direction = 0;
-		falseLoopDepth = 0;
+		//falseLoopDepth = 0;
 		stop = 0;
 
 		/* We use a currentWord buffer to hold the word we're
@@ -1143,14 +1143,14 @@ int main(int argc,char **argv)
 			--currCell->energy;
       
 			/* Execute the instruction */
-			if (falseLoopDepth) {
+			//if (falseLoopDepth) {
 				/* Skip forward to matching CLOSE LOOP if we're in a false loop. */
-				if (inst == 0x9) /* Increment false OPEN LOOP depth */
-					++falseLoopDepth;
-				else 
-					if (inst == 0xa) /* Decrement on CLOSE LOOP */
-						--falseLoopDepth;
-			} else {
+				//if (inst == 0x9) /* Increment false OPEN LOOP depth */
+					//++falseLoopDepth;
+				//else 
+				//	if (inst == 0xa) /* Decrement on CLOSE LOOP */
+						//--falseLoopDepth;
+			//} else {
 				/* If we're not in a false OPEN LOOP/CLOSE LOOP, execute normally */
         
 				/* Keep track of execution frequencies for each instruction */
@@ -1285,7 +1285,7 @@ int main(int argc,char **argv)
 						stop = 1;
 						break;
 				} // end switch
-			} // end else 
+			//} // end else 
 
 			/* Advance the shift and word pointers, and loop around
 			* to the beginning at the end of the genome. */
