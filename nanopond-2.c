@@ -47,7 +47,7 @@
  *       a straight line. It also makes pretty graphics.
  * 1.7 - Added more statistics, such as original lineage, and made the
  *       genome report files CSV files as well.
- * 1.8 - Fixed LOOP/REP bug updateed by user Sotek.  Thanks!  Also
+ * 1.8 - Fixed OPEN LOOP/CLOSE LOOP bug updateed by user Sotek.  Thanks!  Also
  *       reduced the default mutation rate a bit.
  * 1.9 - Added a bunch of changes suggested by Christoph Groth: a better
  *       coloring algorithm, right click to switch coloring schemes (two
@@ -97,7 +97,7 @@
  *
  * - Every UPDATE_FREQUENCY clock ticks a line of comma seperated output
  *   is printed to STDOUT with some statistics about what's going on.
- * - Every REPORT_FREQUENCY clock ticks, all viable replicators (cells whose
+ * - Every CLOSE LOOPORT_FREQUENCY clock ticks, all viable replicators (cells whose
  *   generation is >= 2) are reported to a file on disk.
  * - Every INFLOW_FREQUENCY clock ticks a random x,y location is picked,
  *   energy is added (see INFLOW_RATE_MEAN and INFLOW_RATE_DEVIATION)
@@ -253,7 +253,7 @@
  * semi-human-readable if you look at the big switch() statement
  * in the main loop to see what instruction is signified by each
  * four-bit value. */
-#define REPORT_FREQUENCY 10000000
+#define CLOSE LOOPORT_FREQUENCY 10000000
 
 /* Mutation rate -- range is from 0 (none) to 0xffffffff (all mutations--
  * every instruction executed is randomly chosen, regardless of genome!) */
@@ -600,7 +600,7 @@ static void doReport(const uint64_t clock)
 					/* Four STOP instructions in a row is considered the end.
 					* The probability of this being wrong is *very* small, and
 					* could only occur if you had four STOPs in a row inside
-					* a LOOP/REP pair that's always false. In any case, this
+					* a OPEN LOOP/CLOSE LOOP pair that's always false. In any case, this
 					* would always result in our *underestimating* the size of
 					* the genome and would never result in an overestimation. */
 					fprintf(d,"%lx",inst);
@@ -640,7 +640,7 @@ static void reportCell(FILE *file, struct Cell *cell) {
 			/* Four STOP instructions in a row is considered the end of the genome.
 			* The probability of this being wrong is *very* small, and
 			* could only occur if you had four STOPs in a row inside
-			* a LOOP/REP pair that's always false. In any case, this
+			* a OPEN LOOP/CLOSE LOOP pair that's always false. In any case, this
 			* would always result in our *underestimating* the size of
 			* the genome and would never result in an overestimation. */
 			fprintf(file,"%lx",inst);
@@ -1002,9 +1002,9 @@ int main(int argc,char **argv)
 	uintptr_t loopStack_shiftPtr[MAX_NUM_INSTR];	/* Virtual machine loop/rep stack */
 	uintptr_t loopStackPtr;				/* 				  */
   
-	uintptr_t falseLoopDepth; 		/* If this is nonzero, we're skipping to matching REP */
+	uintptr_t falseLoopDepth; 		/* If this is nonzero, we're skipping to matching CLOSE LOOP */
   						/* It is incremented to track the depth of a nested set
-   						* of LOOP/REP pairs in false state. */
+   						* of OPEN LOOP/CLOSE LOOP pairs in false state. */
   
   
   
@@ -1019,7 +1019,7 @@ int main(int argc,char **argv)
 
 
 
-	/***** START MAIN LOOP *****/
+	/***** START MAIN OPEN LOOP *****/
 
 	for(;;) {
 
@@ -1043,8 +1043,8 @@ int main(int argc,char **argv)
         }
 
         /* Print out reports if frequency for how often is defined */
-    #ifdef REPORT_FREQUENCY
-		if (!(clock % REPORT_FREQUENCY))
+    #ifdef CLOSE LOOPORT_FREQUENCY
+		if (!(clock % CLOSE LOOPORT_FREQUENCY))
 			doReport(clock);
     #endif 
 
@@ -1144,14 +1144,14 @@ int main(int argc,char **argv)
       
 			/* Execute the instruction */
 			if (falseLoopDepth) {
-				/* Skip forward to matching REP if we're in a false loop. */
-				if (inst == 0x9) /* Increment false LOOP depth */
+				/* Skip forward to matching CLOSE LOOP if we're in a false loop. */
+				if (inst == 0x9) /* Increment false OPEN LOOP depth */
 					++falseLoopDepth;
 				else 
-					if (inst == 0xa) /* Decrement on REP */
+					if (inst == 0xa) /* Decrement on CLOSE LOOP */
 						--falseLoopDepth;
 			} else {
-				/* If we're not in a false LOOP/REP, execute normally */
+				/* If we're not in a false OPEN LOOP/CLOSE LOOP, execute normally */
         
 				/* Keep track of execution frequencies for each instruction */
 				statCounters.instructionExecutions[inst] += 1.0;
@@ -1202,7 +1202,7 @@ int main(int argc,char **argv)
 						outputBuf[cell_wordPtr] &= ~(((uintptr_t)0xf) << cell_shiftPtr);
 						outputBuf[cell_wordPtr] |= cell_register << cell_shiftPtr;
 						break;
-					case 0x9: /* LOOP: Jump forward to matching REP if cell_register is zero */
+					case 0x9: /* OPEN LOOP: Jump forward to matching CLOSE LOOP if cell_register is zero */
 						if (cell_register) {
 							if (loopStackPtr >= MAX_NUM_INSTR)
 								stop = 1; /* Stack overflow ends execution */
@@ -1213,14 +1213,14 @@ int main(int argc,char **argv)
 							}
 						} else falseLoopDepth = 1;
 						break;
-					case 0xa: /* REP: Jump back to matching LOOP if cell_register is nonzero */
+					case 0xa: /* CLOSE LOOP: Jump back to matching OPEN LOOP if cell_register is nonzero */
 						if (loopStackPtr) {
 							--loopStackPtr;
 							if (cell_register) {
 								wordPtr = loopStack_wordPtr[loopStackPtr];
 								shiftPtr = loopStack_shiftPtr[loopStackPtr];
 								currentWord = currCell->genome[wordPtr];
-								/* This ensures that the LOOP is rerun */
+								/* This ensures that the OPEN LOOP is rerun */
 								continue;
 							}
 						}
