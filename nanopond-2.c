@@ -1000,7 +1000,7 @@ int main(int argc,char **argv)
   
 	uintptr_t loopStack_wordPtr[MAX_NUM_INSTR];	/*				  */
 	uintptr_t loopStack_shiftPtr[MAX_NUM_INSTR];	/* Virtual machine loop/rep stack */
-	uintptr_t loopStackPtr;				/* 				  */
+	uintptr_t whichLoop;				/* 				  */
   
 	uintptr_t falseLoopDepth; 		/* If this is nonzero, we're skipping to matching CLOSE LOOP */
   						/* It is incremented to track the depth of a nested set
@@ -1099,7 +1099,7 @@ int main(int argc,char **argv)
 		cell_wordPtr = 0;
 		cell_shiftPtr = 0;
 		cell_register = 0;
-		loopStackPtr = 0;
+		whichLoop = 0;
 		wordPtr = EXEC_START_WORD;
 		shiftPtr = EXEC_START_BIT;
 		cell_direction = 0;
@@ -1203,25 +1203,29 @@ int main(int argc,char **argv)
 						outputBuf[cell_wordPtr] |= cell_register << cell_shiftPtr;
 						break;
 					case 0x9: /* OPEN LOOP: Jump forward to matching CLOSE LOOP if cell_register is zero */
-						if (cell_register) {
-							if (loopStackPtr >= MAX_NUM_INSTR)
+						//if (cell_register) {
+							if (whichLoop >= MAX_NUM_INSTR)
 								stop = 1; /* Stack overflow ends execution */
 							else {
-								loopStack_wordPtr[loopStackPtr] = wordPtr;
-								loopStack_shiftPtr[loopStackPtr] = shiftPtr;
-								++loopStackPtr;
+								// Changed to increment loop stack pointer, then record location of current instr
+								++whichLoop;
+								loopStack_wordPtr[whichLoop] = wordPtr;
+								loopStack_shiftPtr[whichLoop] = shiftPtr;
 							}
-						} else falseLoopDepth = 1;
+						//} else falseLoopDepth = 1;
 						break;
 					case 0xa: /* CLOSE LOOP: Jump back to matching OPEN LOOP if cell_register is nonzero */
-						if (loopStackPtr) {
-							--loopStackPtr;
+						if (whichLoop) {
 							if (cell_register) {
-								wordPtr = loopStack_wordPtr[loopStackPtr];
-								shiftPtr = loopStack_shiftPtr[loopStackPtr];
+								wordPtr = loopStack_wordPtr[whichLoop];
+								shiftPtr = loopStack_shiftPtr[whichLoop];
 								currentWord = currCell->genome[wordPtr];
 								/* This ensures that the OPEN LOOP is rerun */
 								continue;
+							} else {
+								loopStack_wordPtr[whichLoop] = 0;
+								loopStack_shiftPtr[whichLoop] = 0;
+								--whichLoop;
 							}
 						}
 						break;
@@ -1257,6 +1261,7 @@ int main(int argc,char **argv)
 							++cellIDCounter;
 						} else {
 							if (neighborCell->generation > 2) {
+								// Failing to kill cell results in fraction of energy taken away
 								tmp = currCell->energy / FAILED_KILL_PENALTY;
 								if (currCell->energy > tmp)
 									currCell->energy -= tmp;
