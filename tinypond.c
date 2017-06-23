@@ -1053,38 +1053,37 @@ int main(int argc,char **argv)
 			doReport(clock);
     #endif 
 
-		/* Introduce a random cell somewhere with a given energy level */
-		/* This is called seeding, and introduces both energy and
-		* entropy into the substrate. This happens every INFLOW_FREQUENCY
-		* clock ticks. */
-		if (!(clock % INFLOW_FREQUENCY)) {
-			x = getRandom() % POND_SIZE_X;
-			y = getRandom() % POND_SIZE_Y;
-			currCell = &cellArray[x][y];
-			currCell->ID = cellIDCounter;
-			currCell->parentID = 0;
-			currCell->lineage = cellIDCounter;
-			currCell->generation = 0;
-#ifdef INFLOW_RATE_VARIATION
-			currCell->energy += INFLOW_RATE_BASE + (getRandom() % INFLOW_RATE_VARIATION);
-#else
-			currCell->energy += INFLOW_RATE_BASE;
-#endif /* INFLOW_RATE_VARIATION */
-			for(i=0;i<MAX_WORDS_GENOME;++i) 
-				currCell->genome[i] = getRandom();
 
-			++cellIDCounter;
+
+		// Fill all cells with base amount of energy but no genome
+		for (x = 0; x < POND_SIZE_X; x++)  {
+			for (y = 0; y < POND_SIZE_Y; y++) {
+				currCell = &cellArray[x][y];
+				currCell->ID = cellIDCounter;
+				currCell->parentID = 0;
+				currCell->lineage = cellIDCounter;
+				currCell->generation = 0;
+				currCell->energy += INFLOW_RATE_BASE;
+			
+				++cellIDCounter;
       
-      /* Update the random cell on SDL screen if viz is enabled */
-#ifdef USE_SDL_NOTYET
-			//FIXME
-			if (SDL_MUSTLOCK(screen))
-				SDL_LockSurface(screen);
-			((uint8_t *)screen->pixels)[x + (y * sdlPitch)] = getColor(currCell);
-			if (SDL_MUSTLOCK(screen))
-				SDL_UnlockSurface(screen);
-#endif /* USE_SDL */
+			}
 		}
+
+
+
+		// Implant a single genome in the center
+		currCell = &cellArray[(POND_SIZE_X + 1) / 2][(POND_SIZE_Y + 1) / 2];
+		currCell->ID = cellIDCounter;
+		currCell->parentID = 0;
+		currCell->lineage = cellIDCounter;
+		currCell->generation = 0;
+		currCell->energy += INFLOW_RATE_BASE;
+		// insert genome here with for loop and probably a function too		
+		char[] implantGenome = "93616386261efaded";	 	
+
+
+		++cellIDCounter;
   
 
 
