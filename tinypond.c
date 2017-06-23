@@ -577,7 +577,7 @@ static void doReport(const uint64_t clock)
 	uintptr_t x,y,wordPtr,shiftPtr,inst,stopCount,i;
 	struct Cell *currCell;
   
-	sprintf(buf,"0%llu.report.csv",clock);
+	sprintf(buf,"t%llu.report.csv",clock);
 	d = fopen(buf,"w");
 	if (!d) {
 		fprintf(stderr,"[WARNING] Could not open %s for writing.\n",buf);
