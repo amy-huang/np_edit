@@ -264,15 +264,15 @@
 /* How frequently should random cells / energy be introduced?
  * Making this too high makes things very chaotic. Making it too low
  * might not introduce enough energy. */
-//#define INFLOW_FREQUENCY 100
+#define INFLOW_FREQUENCY 100
 
 /* Base amount of energy to introduce per INFLOW_FREQUENCY ticks */
-//#define INFLOW_RATE_BASE 4000
+#define INFLOW_RATE_BASE 4000
 
 /* A random amount of energy between 0 and this is added to
  * INFLOW_RATE_BASE when energy is introduced. Comment this out for
  * no variation in inflow rate. */
-//#define INFLOW_RATE_VARIATION 8000
+#define INFLOW_RATE_VARIATION 8000
 
 /* Size of pond in X and Y dimensions. */
 #define POND_SIZE_X 5
