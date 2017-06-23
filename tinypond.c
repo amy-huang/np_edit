@@ -1080,7 +1080,7 @@ int main(int argc,char **argv)
 		currCell->generation = 0;
 		currCell->energy += INFLOW_RATE_BASE;
 		// insert genome here with for loop and probably a function too		
-		char[] implantGenome = "93616386261efaded";	 	
+		char implantGenome[] = "93616386261efaded";	 	
 
 
 		++cellIDCounter;
