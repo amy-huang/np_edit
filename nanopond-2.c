@@ -239,7 +239,7 @@
 /* ----------------------------------------------------------------------- */
 
 /* Iteration to stop at. Comment this out to run forever. */
-#define STOP_AT 1
+#define STOP_AT 2
 
 /* Frequency of comprehensive updates-- lower values will provide more
  * info while slowing down the simulation. Higher values will give less
@@ -305,14 +305,6 @@
 #endif /* USE_SDL */
 
 /* ----------------------------------------------------------------------- */
-
-/* TIMER FUNCTION */
-static void timeHandler(struct itimerval tval) {
-#ifdef STOP_AT
-    printf("\n Time is up. %d seconds have passed.\n", STOP_AT);
-#endif    
-    exit(0);
-}
 
 /* ----------------------------------------------------------------------- */
 /* This is the Mersenne Twister by Makoto Matsumoto and Takuji Nishimura   */
@@ -938,6 +930,17 @@ static void takeGenome(char *genomeString) {
 
 /***** END IO FUNCTIONS *****/
 
+/* TIMER FUNCTION */
+static void timeHandler(struct itimerval tval) {
+#ifdef STOP_AT
+    printf("\n Time is up. %d seconds have passed.\n", STOP_AT);
+#endif    
+    exit(0);
+}
+
+static void updateHandler(struct itimerval tval) {
+	doUpdate();
+}
 
 /**
  * Main method. argc is number of arguments and **argv is a pointer to an array.
@@ -946,11 +949,14 @@ int main(int argc,char **argv)
 {
     /* set and handle timer */	
 #ifdef STOP_AT
-    struct itimerval tval;
-    tval.it_value.tv_sec = STOP_AT;   // set timer to however many seconds
+    struct itimerval tvalStop, struct itimerval tvalUpdate;
+    tvalStop.it_value.tv_sec = STOP_AT;   // set timer to however many seconds
+    tvalUpdate.it_value.tv_sec = 1 ;   // set timer to however many seconds
 
     (void) signal(SIGALRM, timeHandler);
-    (void) setitimer(ITIMER_REAL, &tval, NULL);
+    (void) setitimer(ITIMER_REAL, &tvalStop, NULL);
+    (void) signal(SIGALRM, updateHandler);
+    (void) setitimer(ITIMER_REAL, &tvalUpdate, NULL);
 #endif
 
     uintptr_t i,x,y;
@@ -1038,7 +1044,7 @@ int main(int argc,char **argv)
 		/* Increment clock and print out updates every UPDATE_FREQUENCY amount of main loop cycles */
 		/* Clock is incremented at the start, so it starts at 1 */
 		if (!(++clock % UPDATE_FREQUENCY)) {
-			doUpdate(clock);
+			//doUpdate(clock);
             // Update screen if using SDL display
         #ifdef USE_SDL
 		    updateScreen();
@@ -1206,12 +1212,12 @@ int main(int argc,char **argv)
 					case 0x9: /* OPEN LOOP: Jump forward to matching CLOSE LOOP if cell_register is zero */
 						//if (cell_register) {
 							if (whichLoop >= MAX_NUM_INSTR) {
-								printf("----------------------STACK OVERFLOW ------------------------------------\n");
+								//printf("----------------------STACK OVERFLOW ------------------------------------\n");
                                 stop = 1; /* Stack overflow ends execution */
                             }
                             else {
 								// Changed to increment loop stack pointer, then record location of current instr
-								printf("Successful going into loop\n");
+								//printf("Successful going into loop\n");
                                 ++whichLoop;
 								loopStack_wordPtr[whichLoop] = wordPtr;
 								loopStack_shiftPtr[whichLoop] = shiftPtr;
