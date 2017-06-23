@@ -253,7 +253,7 @@
  * semi-human-readable if you look at the big switch() statement
  * in the main loop to see what instruction is signified by each
  * four-bit value. */
-#define REPORT_FREQUENCY 100000
+#define REPORT_FREQUENCY 100000000
 
 /* Mutation rate -- range is from 0 (none) to 0xffffffff (all mutations--
  * every instruction executed is randomly chosen, regardless of genome!) */
@@ -275,8 +275,8 @@
 #define INFLOW_RATE_VARIATION 8000
 
 /* Size of pond in X and Y dimensions. */
-#define POND_SIZE_X 5
-#define POND_SIZE_Y 5
+#define POND_SIZE_X 9
+#define POND_SIZE_Y 9
 
 /* Depth of pond in four-bit codons -- this is the maximum
  * genome size. This *must* be a multiple of 16! */
@@ -590,7 +590,9 @@ static void doReport(const uint64_t clock)
 		for(y=0;y<POND_SIZE_Y;++y) {
 			currCell = &cellArray[x][y];
 			if (currCell->energy&&(currCell->generation > 2)) {
-				fprintf(d,"ID: %llu, parent ID: %llu, lineage: %llu, generation: %llu\n",
+				fprintf(d,"x: %llu, y: %llu, ID: %llu, parent ID: %llu, lineage: %llu, generation: %llu\n",
+					(uint64_t)currCell->x,
+					(uint64_t)currCell->y,
 					(uint64_t)currCell->ID,
 					(uint64_t)currCell->parentID,
 					(uint64_t)currCell->lineage,
