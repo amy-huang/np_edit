@@ -938,10 +938,6 @@ static void timeHandler(struct itimerval tval) {
     exit(0);
 }
 
-static void updateHandler(struct itimerval tval) {
-	doUpdate();
-}
-
 /**
  * Main method. argc is number of arguments and **argv is a pointer to an array.
  */
@@ -949,14 +945,11 @@ int main(int argc,char **argv)
 {
     /* set and handle timer */	
 #ifdef STOP_AT
-    struct itimerval tvalStop, struct itimerval tvalUpdate;
+    struct itimerval tvalStop;
     tvalStop.it_value.tv_sec = STOP_AT;   // set timer to however many seconds
-    tvalUpdate.it_value.tv_sec = 1 ;   // set timer to however many seconds
 
     (void) signal(SIGALRM, timeHandler);
     (void) setitimer(ITIMER_REAL, &tvalStop, NULL);
-    (void) signal(SIGALRM, updateHandler);
-    (void) setitimer(ITIMER_REAL, &tvalUpdate, NULL);
 #endif
 
     uintptr_t i,x,y;
@@ -1044,7 +1037,7 @@ int main(int argc,char **argv)
 		/* Increment clock and print out updates every UPDATE_FREQUENCY amount of main loop cycles */
 		/* Clock is incremented at the start, so it starts at 1 */
 		if (!(++clock % UPDATE_FREQUENCY)) {
-			//doUpdate(clock);
+			doUpdate(clock);
             // Update screen if using SDL display
         #ifdef USE_SDL
 		    updateScreen();
