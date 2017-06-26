@@ -1206,12 +1206,12 @@ int main(int argc,char **argv)
 						//if (cell_register) {
 							if (whichLoop >= MAX_NUM_INSTR) {
 								//printf("----------------------STACK OVERFLOW ------------------------------------\n");
-                                stop = 1; /* Stack overflow ends execution */
-                            }
-                            else {
+                                				stop = 1; /* Stack overflow ends execution */
+                            				}
+                            				else {
 								// Changed to increment loop stack pointer, then record location of current instr
 								//printf("Successful going into loop\n");
-                                ++whichLoop;
+                                				++whichLoop;
 								loopStack_wordPtr[whichLoop] = wordPtr;
 								loopStack_shiftPtr[whichLoop] = shiftPtr;
 							}

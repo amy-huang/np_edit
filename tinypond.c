@@ -1080,8 +1080,13 @@ int main(int argc,char **argv)
 		currCell->generation = 0;
 		currCell->energy += INFLOW_RATE_BASE;
 		// insert genome here with for loop and probably a function too		
-		char implantGenome[] = "93616386261efaded";	 	
-
+		char implantGenome[] = "12345faded";	 	
+		int instrInWord = 0, currInstr = 0, instrPerWord = 8;
+		
+		// Until all 10 instructions have been processed,
+		for (instrInWord = 0; instrInWord < instrPerWord; instrInWord++) {
+			
+		}
 
 		++cellIDCounter;
   
