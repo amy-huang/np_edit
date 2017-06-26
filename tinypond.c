@@ -982,22 +982,6 @@ int main(int argc,char **argv)
 		((uint8_t *)&statCounters)[x] = (uint8_t)0;
   
  
-	/* Clear the pond and initialize all genomes
-	* to 0xffff... */
-	for(x=0;x<POND_SIZE_X;++x) {
-		for(y=0;y<POND_SIZE_Y;++y) {
-			cellArray[x][y].x = x;
-			cellArray[x][y].y = y;
-			cellArray[x][y].ID = 0;
-			cellArray[x][y].parentID = 0;
-			cellArray[x][y].lineage = 0;
-			cellArray[x][y].generation = 0;
-			cellArray[x][y].energy = 0;
-			for(i=0;i<MAX_WORDS_GENOME;++i)
-				cellArray[x][y].genome[i] = ~((uintptr_t)0);
-		}
-	}
-  
 	uint64_t clock = 0;		/* Clock is incremented on each core loop */
   
 	uint64_t cellIDCounter = 0;	/* This is used to generate unique cell IDs */
@@ -1019,12 +1003,46 @@ int main(int argc,char **argv)
 	//uintptr_t falseLoopDepth; 		/* If this is nonzero, we're skipping to matching CLOSE LOOP */
   						/* It is incremented to track the depth of a nested set
    						* of OPEN LOOP/CLOSE LOOP pairs in false state. */
-  
-  
-  
-   
 	int stop;			/* If this is nonzero, cell execution stops. This allows us
 					* to avoid the ugly use of a goto to exit the loop. :) */
+  
+  
+  
+	/* Clear the pond and initialize all genomes
+	* to 0xffff...give each cell a certain amount of energy */
+	for(x=0;x<POND_SIZE_X;++x) {
+		for(y=0;y<POND_SIZE_Y;++y) {
+			// Initialize position, genome and markers 
+			cellArray[x][y].x = x;
+			cellArray[x][y].y = y;
+			cellArray[x][y].ID = 0;
+			cellArray[x][y].parentID = 0;
+			cellArray[x][y].lineage = 0;
+			cellArray[x][y].generation = 0;
+			cellArray[x][y].energy = 0;
+			for(i=0;i<MAX_WORDS_GENOME;++i)
+				cellArray[x][y].genome[i] = ~((uintptr_t)0);
+			
+			// Set ID counters
+			currCell = &cellArray[x][y];
+			currCell->ID = cellIDCounter;
+			currCell->parentID = 0;
+			currCell->lineage = cellIDCounter;
+			currCell->generation = 0;
+			currCell->energy += INFLOW_RATE_BASE;
+			
+			++cellIDCounter;
+		}
+	}
+  
+	// Implant a single genome in the center
+	currCell = &cellArray[(POND_SIZE_X + 1) / 2][(POND_SIZE_Y + 1) / 2];
+	currCell->ID = cellIDCounter;
+	currCell->parentID = 0;
+	currCell->lineage = cellIDCounter;
+	currCell->generation = 0;
+	currCell->energy += INFLOW_RATE_BASE;
+   
 #ifdef USE_SDL
 	/* Set up SDL if we're using it */
 	Initialize_SDL2();
@@ -1052,47 +1070,6 @@ int main(int argc,char **argv)
 		if (!(clock % REPORT_FREQUENCY))
 			doReport(clock);
     #endif 
-
-
-
-		// Fill all cells with base amount of energy but no genome
-		for (x = 0; x < POND_SIZE_X; x++)  {
-			for (y = 0; y < POND_SIZE_Y; y++) {
-				currCell = &cellArray[x][y];
-				currCell->ID = cellIDCounter;
-				currCell->parentID = 0;
-				currCell->lineage = cellIDCounter;
-				currCell->generation = 0;
-				currCell->energy += INFLOW_RATE_BASE;
-			
-				++cellIDCounter;
-      
-			}
-		}
-
-
-
-		// Implant a single genome in the center
-		currCell = &cellArray[(POND_SIZE_X + 1) / 2][(POND_SIZE_Y + 1) / 2];
-		currCell->ID = cellIDCounter;
-		currCell->parentID = 0;
-		currCell->lineage = cellIDCounter;
-		currCell->generation = 0;
-		currCell->energy += INFLOW_RATE_BASE;
-		// insert genome here with for loop and probably a function too		
-		char implantGenome[] = "12345faded";	 	
-		int instrInWord = 0, currInstr = 0, instrPerWord = 8;
-		
-		// Until all 10 instructions have been processed,
-		for (instrInWord = 0; instrInWord < instrPerWord; instrInWord++) {
-			
-		}
-
-		++cellIDCounter;
-  
-
-
-
 
 		/* Pick a random cell to execute */
 		x = getRandom() % POND_SIZE_X;
