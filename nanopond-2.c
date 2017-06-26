@@ -239,7 +239,7 @@
 /* ----------------------------------------------------------------------- */
 
 /* Iteration to stop at. Comment this out to run forever. */
-#define STOP_AT 2
+#define STOP_AT 100
 
 /* Frequency of comprehensive updates-- lower values will provide more
  * info while slowing down the simulation. Higher values will give less
