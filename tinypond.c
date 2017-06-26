@@ -267,7 +267,7 @@
 #define INFLOW_FREQUENCY 100
 
 /* Base amount of energy to introduce per INFLOW_FREQUENCY ticks */
-#define INFLOW_RATE_BASE 4000
+#define INFLOW_RATE_BASE 4000000
 
 /* A random amount of energy between 0 and this is added to
  * INFLOW_RATE_BASE when energy is introduced. Comment this out for
@@ -1036,13 +1036,23 @@ int main(int argc,char **argv)
 	}
   
 	// Implant a single genome in the center
-	currCell = &cellArray[(POND_SIZE_X + 1) / 2][(POND_SIZE_Y + 1) / 2];
+	x = (POND_SIZE_X + 1) / 2;
+	y = (POND_SIZE_Y + 1) / 2;
+	currCell = &cellArray[x][y];
 	currCell->ID = cellIDCounter;
 	currCell->parentID = 0;
 	currCell->lineage = cellIDCounter;
 	currCell->generation = 0;
 	currCell->energy += INFLOW_RATE_BASE;
-   
+	// Fill in genome. Maximum 64 bits in a word and 32 words per genome. Anything over gets ignored I believe.
+	//cellArray[x][y].genome[0] = 0x1234567812345678123456781234567812345678123456781234567812345678;
+	//cellArray[x][y].genome[1] = 0x12444345678;
+   	
+	// make cell random
+	for (i = 0; i < MAX_WORDS_GENOME; i++) {
+		currCell->genome[i] = getRandom();
+	}	
+
 #ifdef USE_SDL
 	/* Set up SDL if we're using it */
 	Initialize_SDL2();
@@ -1071,10 +1081,31 @@ int main(int argc,char **argv)
 			doReport(clock);
     #endif 
 
+
+
+		// Bring in energy 
+		if (!(clock % INFLOW_FREQUENCY)) {
+//                        x = getRandom() % POND_SIZE_X;
+//                        y = getRandom() % POND_SIZE_Y;
+//                        currCell = &cellArray[x][y];
+//                        currCell->ID = cellIDCounter;
+//                        currCell->parentID = 0;
+//                        currCell->lineage = cellIDCounter;
+ //                       currCell->generation = 0;
+#ifdef INFLOW_RATE_VARIATION
+                        currCell->energy += INFLOW_RATE_BASE + (getRandom() % INFLOW_RATE_VARIATION);
+#else
+                        currCell->energy += INFLOW_RATE_BASE;
+#endif /* INFLOW_RATE_VARIATION */
+		}
+
 		/* Pick a random cell to execute */
-		x = getRandom() % POND_SIZE_X;
-		y = getRandom() % POND_SIZE_Y;
-		currCell = &cellArray[x][y];
+		//x = getRandom() % POND_SIZE_X;
+		//y = getRandom() % POND_SIZE_Y;
+		//currCell = &cellArray[x][y];
+
+		// Check that I'm executing the right cell
+		//printf("Cell being executed: %d cell x: %d cell y: %d \n", currCell->ID, currCell->x, currCell->y);
 
 		/* Reset the state of the VM prior to execution */
 		for(i=0;i<MAX_WORDS_GENOME;++i)
@@ -1103,8 +1134,12 @@ int main(int argc,char **argv)
 
 
 /***** START CURRENT CELL EXECUTION *****/
-        
+	       
+	printf("bits in a word: %llu max words in genome: %llu", BITS_IN_WORD, MAX_WORDS_GENOME);
+	printf("amount of energy: %d stop is: %d\n", currCell->energy, stop); 
         while (currCell->energy&&(!stop)) {
+			printf("current instruction: %d\n", inst);
+
 			/* Get the next instruction */
 			inst = (currentWord >> shiftPtr) & 0xf;
       
