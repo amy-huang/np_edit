@@ -1014,7 +1014,7 @@ int main(int argc,char **argv)
 	uintptr_t loopStack_shiftPtr[MAX_NUM_INSTR];	/* Virtual machine loop/rep stack */
 	uintptr_t whichLoop;				/* 				  */
   
-	//uintptr_t falseLoopDepth; 		/* If this is nonzero, we're skipping to matching CLOSE LOOP */
+	uintptr_t falseLoopDepth; 		/* If this is nonzero, we're skipping to matching CLOSE LOOP */
   						/* It is incremented to track the depth of a nested set
    						* of OPEN LOOP/CLOSE LOOP pairs in false state. */
   
@@ -1103,7 +1103,7 @@ int main(int argc,char **argv)
 		wordPtr = EXEC_START_WORD;
 		shiftPtr = EXEC_START_BIT;
 		cell_direction = 0;
-		//falseLoopDepth = 0;
+		falseLoopDepth = 0;
 		stop = 0;
 
 		/* We use a currentWord buffer to hold the word we're

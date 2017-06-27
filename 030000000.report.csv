@@ -1,190 +1,240 @@
-ID: 8840577, parent ID: 8819566, lineage: 7712668, generation: 6
-f1ed22e4d995ffff
-ID: 1267720, parent ID: 1233311, lineage: 985591, generation: 4
-0fffdea51a9495b81af0ffff
-ID: 14736037, parent ID: 8254993, lineage: 1720365, generation: 3
-70ffff
-ID: 17099952, parent ID: 12403823, lineage: 12047680, generation: 3
-dddd49b4e48d6539251815a120ffff
-ID: 14263095, parent ID: 12403823, lineage: 12047680, generation: 3
-dddd49b4e48d6539251ffff
-ID: 15365241, parent ID: 14263095, lineage: 12047680, generation: 4
-dffff
-ID: 16916354, parent ID: 16458524, lineage: 916730, generation: 25
-fe8459969587b1ea5e0ffff
-ID: 17112068, parent ID: 17043377, lineage: 916730, generation: 24
-fe8459969587b1ea5e0ffff
-ID: 17043377, parent ID: 16582307, lineage: 916730, generation: 23
-fe8459969587b1ea5e0ffff
-ID: 17181652, parent ID: 16885496, lineage: 916730, generation: 22
-fe8459969587b1ea5e0ffff
-ID: 16885496, parent ID: 16816594, lineage: 916730, generation: 21
-fe8459969587b1ea5e0ffff
-ID: 17211179, parent ID: 15622976, lineage: 916730, generation: 20
-fe8459969587b1ea5e0ffff
-ID: 15622976, parent ID: 15183302, lineage: 916730, generation: 19
-fe8459969587b1ea5e0ffff
-ID: 16327654, parent ID: 15283028, lineage: 916730, generation: 18
-fe8459969587b1ea5e0ffff
-ID: 16739322, parent ID: 15924964, lineage: 916730, generation: 17
-fe8459969587b1ea5e0ffff
-ID: 17241928, parent ID: 15220464, lineage: 916730, generation: 16
-fe8459969587b1ea5e0ffff
-ID: 15220464, parent ID: 14903817, lineage: 916730, generation: 15
-fe8459969587b1ea5e0ffff
-ID: 15988462, parent ID: 14534244, lineage: 916730, generation: 14
-fe8459969587b1ea5e0ffff
-ID: 17327879, parent ID: 17022880, lineage: 916730, generation: 12
-fe8459969587b1ea5e0ffff
-ID: 17022880, parent ID: 16794921, lineage: 916730, generation: 11
-fe8459969587b1ea5e0ffff
-ID: 16794921, parent ID: 16456812, lineage: 916730, generation: 10
-fe8459969587b1ea5e0ffff
-ID: 16456812, parent ID: 16145159, lineage: 916730, generation: 9
-fe8459969587b1ea5e0ffff
-ID: 16145159, parent ID: 15888344, lineage: 916730, generation: 8
-fe8459969587b1ea5e0ffff
-ID: 17263720, parent ID: 13419095, lineage: 916730, generation: 7
-fe8459969587b1ea5e0ffff
-ID: 13419095, parent ID: 12719920, lineage: 916730, generation: 6
-fe8459969587b1ea5e0ffff
-ID: 16872059, parent ID: 16848624, lineage: 916730, generation: 5
-fe8459969587b1ea5e0ffff
-ID: 16848624, parent ID: 13390863, lineage: 916730, generation: 4
-fe8459969587b1ea5e0ffff
-ID: 13390863, parent ID: 11246094, lineage: 916730, generation: 3
-fe8459969587b1ea5e0ffff
-ID: 8647155, parent ID: 8431072, lineage: 6978195, generation: 5
-13ffff
-ID: 16277674, parent ID: 8899172, lineage: 6978195, generation: 3
+ID: 8181494, parent ID: 7929986, lineage: 6969600, generation: 5
+c24a9864bb21b39ffff
+ID: 17344932, parent ID: 17246826, lineage: 16388359, generation: 6
+685c649958b13e4ea0ffff
+ID: 17246826, parent ID: 16947772, lineage: 16388359, generation: 5
+685c649958b13e4ea0ffff
+ID: 17332990, parent ID: 17298617, lineage: 16388359, generation: 4
+685c649958b13e4ea0ffff
+ID: 17298617, parent ID: 16594591, lineage: 16388359, generation: 3
+685c649958b13e4ea0ffff
+ID: 10775521, parent ID: 10167985, lineage: 8734010, generation: 6
+1e5a34c1a27dcf91b844588ffff
+ID: 16363426, parent ID: 10775521, lineage: 8734010, generation: 7
 1ffff
-ID: 10351138, parent ID: 10063272, lineage: 9243355, generation: 5
+ID: 12050000, parent ID: 9831370, lineage: 8734010, generation: 5
+1e5a344ffff
+ID: 12401005, parent ID: 12042293, lineage: 8734010, generation: 3
+1e5a33ffff
+ID: 16732217, parent ID: 16573110, lineage: 198682, generation: 19
+f212a1769e8581a46a0ffff
+ID: 17360393, parent ID: 11442738, lineage: 198682, generation: 18
+f212a1769e8581a46a0ffff
+ID: 11442738, parent ID: 10098096, lineage: 198682, generation: 17
+f212a1769e8581a46a0ffff
+ID: 17080668, parent ID: 17069226, lineage: 198682, generation: 16
+f212a1769e8581a46a0ffff
+ID: 17069226, parent ID: 9861877, lineage: 198682, generation: 15
+f212a1769e8581a46a0ffff
+ID: 9861877, parent ID: 9818962, lineage: 198682, generation: 14
+f212a1769e8581a46a0ffff
+ID: 17352256, parent ID: 17290458, lineage: 198682, generation: 7
+f212a1769e8581a46a0ffff
+ID: 17290458, parent ID: 4585799, lineage: 198682, generation: 6
+f212a1769e8581a46a0ffff
+ID: 4585799, parent ID: 4538468, lineage: 198682, generation: 5
+f212a1769e8581a46a0ffff
+ID: 17243944, parent ID: 17229680, lineage: 8990604, generation: 29
+3333dd9be81775a80ffff
+ID: 17229680, parent ID: 17128793, lineage: 8990604, generation: 28
+3333dd9be81775a80ffff
+ID: 17128793, parent ID: 16741622, lineage: 8990604, generation: 27
+3333dd9be81775a80ffff
+ID: 17147376, parent ID: 16123528, lineage: 8990604, generation: 25
+3333dd9be81775a80ffff
+ID: 16123528, parent ID: 15918935, lineage: 8990604, generation: 24
+3333dd9be81775a80ffff
+ID: 17235163, parent ID: 16451193, lineage: 8990604, generation: 23
+3333dd9be81775a80ffff
+ID: 16451193, parent ID: 15673103, lineage: 8990604, generation: 22
+3333dd9be81775a80ffff
+ID: 15673103, parent ID: 15012348, lineage: 8990604, generation: 21
+3333dd9be81775a80ffff
+ID: 17290369, parent ID: 16855759, lineage: 8990604, generation: 20
+3333dd9be81775a80ffff
+ID: 16855759, parent ID: 16212962, lineage: 8990604, generation: 19
+3333dd9be81775a80ffff
+ID: 17120503, parent ID: 16840386, lineage: 8990604, generation: 18
+3333dd9be81775a80ffff
+ID: 16840386, parent ID: 16447180, lineage: 8990604, generation: 17
+3333dd9be81775a80ffff
+ID: 15871533, parent ID: 15855970, lineage: 8990604, generation: 16
+3ffff
+ID: 16487024, parent ID: 15548197, lineage: 8990604, generation: 15
+3333dffff
+ID: 15714772, parent ID: 13514658, lineage: 8990604, generation: 13
+3ffff
+ID: 15481850, parent ID: 13514658, lineage: 8990604, generation: 13
+3333dd9be8177ffff
+ID: 16316122, parent ID: 15481850, lineage: 8990604, generation: 14
+3ffff
+ID: 17217477, parent ID: 16051475, lineage: 8990604, generation: 8
+3333dd9be81775a80ffff
+ID: 16051475, parent ID: 15684904, lineage: 8990604, generation: 7
+3333dd9be81775a80ffff
+ID: 14794501, parent ID: 14123664, lineage: 8990604, generation: 7
+3333dd9bffff
+ID: 16539087, parent ID: 15186523, lineage: 8990604, generation: 6
+3333dd9be81775a80ffff
+ID: 14983611, parent ID: 14123664, lineage: 8990604, generation: 7
+33ffff
+ID: 15186523, parent ID: 14223780, lineage: 8990604, generation: 5
+3333dd9be81775a80ffff
+ID: 17285073, parent ID: 16107887, lineage: 8990604, generation: 4
+3333dd9be81775a80ffff
+ID: 17340147, parent ID: 16478249, lineage: 8990604, generation: 3
+3333dd9be81775a80ffff
+ID: 16565883, parent ID: 16479380, lineage: 16339258, generation: 3
 0ffff
-ID: 17352611, parent ID: 16957532, lineage: 6552286, generation: 45
-d111191473a3e61757b4b3d73ec004d95cd958831affff
-ID: 16957532, parent ID: 16596925, lineage: 6552286, generation: 44
-d111191473a3e61757b4b3d73ec004d95cd958831affff
-ID: 16596925, parent ID: 16549082, lineage: 6552286, generation: 43
-d111191473a3e61757b4b3d73ec004d95cd958831affff
-ID: 16549082, parent ID: 16541718, lineage: 6552286, generation: 42
-d111191473a3e61757b4b3d73ec004d95cd958831affff
-ID: 16661668, parent ID: 16576313, lineage: 6552286, generation: 41
-d111191473a3e61757b4b3d73ec004d95cd958831affff
-ID: 5556855, parent ID: 5535172, lineage: 4809635, generation: 4
-cfc0ffff
-ID: 16576313, parent ID: 15158441, lineage: 6552286, generation: 40
-d111191473a3e61757b4b3d73ec004d95cd958831affff
-ID: 17003569, parent ID: 16581139, lineage: 6552286, generation: 39
-d111191473a3e61757b4b3d73ec004d95cd958831affff
-ID: 17242129, parent ID: 16542679, lineage: 6552286, generation: 38
-d111191473a3e61757b4b3d73ec004d95cd958831affff
-ID: 16542679, parent ID: 14287666, lineage: 6552286, generation: 37
-d111191473a3e61757b4b3d73ec004d95cd958831affff
-ID: 16720802, parent ID: 14890590, lineage: 6552286, generation: 36
-d111191473a3e61757b4b3d73ec004d95cd958831ad5924d40ffff
-ID: 17333524, parent ID: 16908209, lineage: 12776326, generation: 11
-08bd149296d3a1a3979565818e7ba98396e829358b3b568d685bfd44ac3dd8c78af00ffff
-ID: 16932571, parent ID: 16593618, lineage: 12776326, generation: 9
-f8bd149296d3a1a3979565818e7ba98396e829358b3b568d685bfd44ac3dd8c78af00ffff
-ID: 16593618, parent ID: 16038033, lineage: 12776326, generation: 8
-f8bd149296d3a1a3979565818e7ba98396e829358b3b568d685bfd44ac3dd8c78af00ffff
-ID: 16661076, parent ID: 16466127, lineage: 12776326, generation: 7
-08bd149296d3a1a3979565818e7ba98396e829358b3b568d685bfd44ac3dd8c78af00ffff
-ID: 16203209, parent ID: 13483285, lineage: 6552286, generation: 30
+ID: 16539387, parent ID: 12120248, lineage: 11311186, generation: 6
+feeffff
+ID: 16851359, parent ID: 16778619, lineage: 7045653, generation: 20
+eeeeeeeeeeeeeeeeeeeee7acfbe465b6ce9b5618a770ffff
+ID: 16778619, parent ID: 16186635, lineage: 7045653, generation: 19
+eeeeeeeeeeeeeeeeeeee7acfbe465b6ce9b5618a770ffff
+ID: 14884244, parent ID: 13297988, lineage: 11311186, generation: 4
+feeffff
+ID: 16186635, parent ID: 15908618, lineage: 7045653, generation: 18
+eeeeeeeeeeeeeeeeeee7acfbe465b6ce9b5618a770ffff
+ID: 15908618, parent ID: 15277380, lineage: 7045653, generation: 17
+eeeeeeeeeeeeeeeeee7acfbe465b6ce9b5618a770ffff
+ID: 16116936, parent ID: 15241545, lineage: 7045653, generation: 16
+eeeeeeeeeeeeeeeee7acfbe465b6ce9b5618a770ffff
+ID: 15241545, parent ID: 14740808, lineage: 7045653, generation: 15
+eeeeeeeeeeeeeeee7acfbe465b6ce9b5618a770ffff
+ID: 15714258, parent ID: 15361247, lineage: 7045653, generation: 14
+eeeeeeeeeeeeeee7acfbe465b6ce9b5618a770ffff
+ID: 15361247, parent ID: 14355752, lineage: 7045653, generation: 13
+eeeeeeeeeeeeee7acfbe465b6ce9b5618a770ffff
+ID: 8058985, parent ID: 8032712, lineage: 7425772, generation: 3
+11bd326c1b8b269bc1b95181c42a04ffff
+ID: 17276425, parent ID: 17021861, lineage: 7045653, generation: 12
+feeeeeeeeeeee7acfbe465b6ce9b5618a770ffff
+ID: 17021861, parent ID: 16093093, lineage: 7045653, generation: 11
+eeeeeeeeeeee7acfbe465b6ce9b5618a770ffff
+ID: 16093093, parent ID: 15439948, lineage: 7045653, generation: 10
+eeeeeeeeeee7acfbe465b6ce9b5618a770ffff
+ID: 17096690, parent ID: 16285992, lineage: 7045653, generation: 9
+eeeeeeeeee7acfbe465b6ce9b5618a770ffff
+ID: 16285992, parent ID: 14698804, lineage: 7045653, generation: 8
+eeeeeeeee7acfbe465b6ce9b5618a770ffff
+ID: 16364105, parent ID: 15593405, lineage: 7045653, generation: 7
+eeeeeeee7acfbe465b6ce9b5618a770ffff
+ID: 15593405, parent ID: 15292716, lineage: 7045653, generation: 6
+eeeeeee7acfbe465b6ce9b5618a770ffff
+ID: 16155789, parent ID: 15145409, lineage: 7045653, generation: 5
+eeeeee7acfbe465b6ce9b5618a770ffff
+ID: 17365286, parent ID: 16749080, lineage: 7045653, generation: 4
+feeee7acfbe465b6ce9b5618a770ffff
+ID: 16749080, parent ID: 15769886, lineage: 7045653, generation: 3
+eeee7acfbe465b6ce9b5618a770ffff
+ID: 17046627, parent ID: 16524510, lineage: 982045, generation: 32
+f49e15688a0ffff
+ID: 17297687, parent ID: 16995789, lineage: 982045, generation: 31
+f49e15688a0ffff
+ID: 16995789, parent ID: 15337073, lineage: 982045, generation: 30
+f49e15688a0ffff
+ID: 17133897, parent ID: 16200623, lineage: 982045, generation: 29
+f49e15688a0ffff
+ID: 17276345, parent ID: 16369147, lineage: 982045, generation: 28
+f49e15688a0ffff
+ID: 17326136, parent ID: 16586696, lineage: 982045, generation: 27
+f49e15688a0ffff
+ID: 17359792, parent ID: 17285221, lineage: 982045, generation: 26
+f49e15688a0ffff
+ID: 17285221, parent ID: 16977575, lineage: 982045, generation: 25
+f49e15688a0ffff
+ID: 16977575, parent ID: 16347938, lineage: 982045, generation: 24
+f49e15688a0ffff
+ID: 17133606, parent ID: 17039746, lineage: 982045, generation: 23
+f49e15688a0ffff
+ID: 17349438, parent ID: 16833442, lineage: 982045, generation: 22
+f49e15688a0ffff
+ID: 16833442, parent ID: 15730829, lineage: 982045, generation: 21
+f49e15688a0ffff
+ID: 17329977, parent ID: 17270162, lineage: 982045, generation: 20
+f49e15688a0ffff
+ID: 17270162, parent ID: 15972253, lineage: 982045, generation: 19
+f49e15688a0ffff
+ID: 17297821, parent ID: 17289799, lineage: 982045, generation: 18
+f49e15688a0ffff
+ID: 17289799, parent ID: 16079965, lineage: 982045, generation: 17
+f49e15688a0ffff
+ID: 16079965, parent ID: 15884124, lineage: 982045, generation: 16
+f49e15688a0ffff
+ID: 15884124, parent ID: 12269095, lineage: 982045, generation: 15
+f49e15688a0ffff
+ID: 17216084, parent ID: 15124378, lineage: 982045, generation: 14
+f49e15688a0ffff
+ID: 15124378, parent ID: 14065081, lineage: 982045, generation: 13
+f49e15688a0ffff
+ID: 15203778, parent ID: 14667264, lineage: 982045, generation: 12
+f49e15688a0ffff
+ID: 17360533, parent ID: 17214872, lineage: 982045, generation: 11
+f49e15688a0ffff
+ID: 17214872, parent ID: 16622968, lineage: 982045, generation: 10
+f49e15688a0ffff
+ID: 16622968, parent ID: 16395474, lineage: 982045, generation: 9
+f49e15688a0ffff
+ID: 15533646, parent ID: 14065270, lineage: 982045, generation: 7
+f49e15688a0ffff
+ID: 14065270, parent ID: 12599626, lineage: 982045, generation: 6
+f49e15688a0ffff
+ID: 17176668, parent ID: 16727275, lineage: 11183151, generation: 3
+effff
+ID: 13095813, parent ID: 12181398, lineage: 11843473, generation: 3
+0ffff
+ID: 15261194, parent ID: 15017817, lineage: 5166900, generation: 14
+d98828bab49581ffff
+ID: 15017817, parent ID: 14646549, lineage: 5166900, generation: 13
+d98828bab49581e3c7a1a77e2113f6ffff
+ID: 13846731, parent ID: 13453851, lineage: 5166900, generation: 10
 dffff
-ID: 16470702, parent ID: 15968691, lineage: 12776326, generation: 5
-08bd149296d3a1a3979565818e7ba98396e829358b3b568d685bfd44ac3dd8c78af00ffff
-ID: 17253214, parent ID: 16806348, lineage: 12776326, generation: 3
-08bd149296d3a1a3979565818e7ba98396e829358b3b568d685bfd44ac3dd8c78af00ffff
-ID: 9807743, parent ID: 8853002, lineage: 6552286, generation: 9
-d111191473a3e61757b4b3d73ec004d95cdffff
-ID: 8620102, parent ID: 8367871, lineage: 6552286, generation: 4
-dffff
-ID: 16948042, parent ID: 12672063, lineage: 5571156, generation: 5
-0ffff
-ID: 12672063, parent ID: 11603848, lineage: 5571156, generation: 4
-f53b8e97d93331cf5b8a8ad8ef74a758e5ed39fe0ffff
-ID: 12818744, parent ID: 11819084, lineage: 5571156, generation: 5
-0ffff
-ID: 11819084, parent ID: 10964361, lineage: 5571156, generation: 4
-f53b8e97d93331cf5b8a8affff
-ID: 17349877, parent ID: 17318286, lineage: 12716217, generation: 23
-f7914d5e8476873a8935dc54ec86e5200000000000000000000ffff
-ID: 9925027, parent ID: 9503168, lineage: 6216930, generation: 21
-1266e3547e937d1ffff
-ID: 17192244, parent ID: 17178686, lineage: 16010789, generation: 5
-59316e5ea93819824e7eb8a26fcfe8ddfb4d4883772d2f57793f5e632d6abe2c74a9185f5e2a5c52a633be9d1eb758ac0ffff
-ID: 10786993, parent ID: 9098162, lineage: 6216930, generation: 13
-1266e3547ffff
-ID: 10717000, parent ID: 10029296, lineage: 6216930, generation: 7
-1266ffff
-ID: 12775327, parent ID: 12743423, lineage: 9440921, generation: 20
-9a2a4be27795ffff
-ID: 17177163, parent ID: 15988359, lineage: 1980810, generation: 46
-f4e7debe4d91b3e7775863e5a84fd6885ffff
-ID: 16870588, parent ID: 16788063, lineage: 1980810, generation: 44
-f4e7debe4d91b3e7775863e5a84fd6885ffff
-ID: 15921725, parent ID: 13033278, lineage: 1980810, generation: 36
-f4e7debe4ffff
-ID: 16753951, parent ID: 16307248, lineage: 1980810, generation: 27
-f4ffff
-ID: 15839635, parent ID: 15711913, lineage: 1980810, generation: 33
-f4e7debe4d91b3e7775863e5a84fdffff
-ID: 17117288, parent ID: 16894954, lineage: 1980810, generation: 55
-f4e7debe4d91b3e7775863e5a84fd6885f20ffff
-ID: 16894954, parent ID: 16860844, lineage: 1980810, generation: 54
-f4e7debe4d91b3e7775863e5a84fd6885f20ffff
-ID: 16860844, parent ID: 16612884, lineage: 1980810, generation: 53
-f4e7debe4d91b3e7775863e5a84fd6885f20ffff
-ID: 15417795, parent ID: 15122989, lineage: 1980810, generation: 51
-f4e7debe4d91b3e7775863e5a84fd6885f20ffff
-ID: 16918320, parent ID: 15005202, lineage: 1980810, generation: 50
-f4e7debe4d91b3e7775863e5a84fd6885f20ffff
-ID: 15005202, parent ID: 14707453, lineage: 1980810, generation: 49
-f4e7debe4d91b3e7775863e5a84fd6885f20ffff
-ID: 14429922, parent ID: 13871790, lineage: 1980810, generation: 47
-f4e7debe4d91b3e7775863e5a84fd6885f20ffff
-ID: 17177365, parent ID: 14429922, lineage: 1980810, generation: 48
-f4e7debe4d91b3e777ffff
-ID: 15988359, parent ID: 13138479, lineage: 1980810, generation: 45
-f4e7debe4d91b3e7775863e5a84fd6885f20ffff
-ID: 15456795, parent ID: 12891230, lineage: 1980810, generation: 43
-f4e7debe4d91b3e7775863e5a84fd6885f20ffff
-ID: 14286098, parent ID: 12638665, lineage: 1980810, generation: 41
-f4e7debe4d91b3e7775863e5a84fd6885f20ffff
-ID: 16796805, parent ID: 15827255, lineage: 1980810, generation: 40
-f4e7debe4d91b3e7775863e5a84fd6885f20ffff
-ID: 14834669, parent ID: 14688417, lineage: 1980810, generation: 26
-f4ffff
-ID: 16605561, parent ID: 16307248, lineage: 1980810, generation: 27
-f4e7debffff
-ID: 15598798, parent ID: 14340246, lineage: 1980810, generation: 28
-f4e7debe4d91bffff
-ID: 15905712, parent ID: 15505549, lineage: 1980810, generation: 32
-f4e7debe4d91b3e7775863e5a84fdffff
-ID: 14668801, parent ID: 13808918, lineage: 1980810, generation: 27
-f4ffff
-ID: 17233259, parent ID: 16624389, lineage: 10616315, generation: 15
-9a4595eb851a675afc0ffff
-ID: 16624389, parent ID: 16476935, lineage: 10616315, generation: 14
-9a4595eb851a675afc00ffff
-ID: 17233102, parent ID: 15931755, lineage: 10616315, generation: 12
-9a4595eb851a675afc00ffff
-ID: 15931755, parent ID: 15879624, lineage: 10616315, generation: 11
-9a4595eb851a675afc00ffff
-ID: 16641115, parent ID: 16396571, lineage: 10616315, generation: 10
-9a4595eb851a675afc00ffff
-ID: 17074866, parent ID: 16699720, lineage: 10616315, generation: 9
-9a4595eb851a675afc0ffff
-ID: 16699720, parent ID: 16308530, lineage: 10616315, generation: 8
-9a4595eb851a675afc00ffff
-ID: 17095684, parent ID: 17022793, lineage: 10616315, generation: 7
-9a4595eb851a675afc0ffff
-ID: 17022793, parent ID: 12265984, lineage: 10616315, generation: 6
-9a4595eb851a675afc00ffff
-ID: 12265984, parent ID: 11654709, lineage: 10616315, generation: 5
-9a4595eb851a675afc00ffff
-ID: 16638199, parent ID: 16307063, lineage: 10616315, generation: 4
-9a4595eb851a675afc00ffff
-ID: 17260672, parent ID: 15852600, lineage: 10616315, generation: 3
-9a4595eb851a675afc0ffff
+ID: 16866345, parent ID: 16516501, lineage: 11109672, generation: 24
+fe5913e58b8ba8fb2db8c3a7fb4aff15e5e77849d6bcc61825f13874d0ffff
+ID: 17108000, parent ID: 16455458, lineage: 11109672, generation: 23
+fe5913e58b8ba8fb2db8c3a7fb4aff15e5e77849d6bcc61825f13874d0ffff
+ID: 16455458, parent ID: 16445935, lineage: 11109672, generation: 22
+fe5913e58b8ba8fb2db8c3a7fb4aff15e5e77849d6bcc61825f13874d0ffff
+ID: 17303632, parent ID: 16371825, lineage: 11109672, generation: 21
+fe5913e58b8ba8fb2db8c3a7fb4aff15e5e77849d6bcc61825f13874d0ffff
+ID: 17312370, parent ID: 16626031, lineage: 11109672, generation: 20
+fe5913e58b8ba8fb2db8c3a7fb4aff15e5e77849d6bcc61825f13874d0ffff
+ID: 16135197, parent ID: 15833735, lineage: 14763045, generation: 4
+f4981bcf55a9b52d33dffff
+ID: 16626031, parent ID: 16116700, lineage: 11109672, generation: 19
+fe5913e58b8ba8fb2db8c3a7fb4aff15e5e77849d6bcc61825f13874d0ffff
+ID: 17264733, parent ID: 16594884, lineage: 11109672, generation: 18
+fe5913e58b8ba8fb2db8c3a7fb4aff15e5e77849d6bcc61825f13874d0ffff
+ID: 16594884, parent ID: 15874593, lineage: 11109672, generation: 17
+fe5913e58b8ba8fb2db8c3a7fb4aff15e5e77849d6bcc61825f13874d0ffff
+ID: 16918236, parent ID: 16320477, lineage: 11109672, generation: 16
+fe5913e58b8ba8fb2db8c3a7fb4aff15e5e77849d6bcc61825f13874d0ffff
+ID: 17321191, parent ID: 16880311, lineage: 11109672, generation: 15
+fe5913e58b8ba8fb2db8c3a7fb4aff15e5e77849d6bcc61825f13874d0ffff
+ID: 16880311, parent ID: 16217546, lineage: 11109672, generation: 14
+fe5913e58b8ba8fb2db8c3a7fb4aff15e5e77849d6bcc61825f13874d0ffff
+ID: 17197722, parent ID: 16881330, lineage: 11109672, generation: 13
+fe5913e58b8ba8fb2db8c3a7fb4aff15e5e77849d6bcc61825f13874d0ffff
+ID: 17352170, parent ID: 17126763, lineage: 11109672, generation: 12
+fe5913e58b8ba8fb2db8c3a7fb4aff15e5e77849d6bcc61825f13874d0ffff
+ID: 17126763, parent ID: 16762048, lineage: 11109672, generation: 11
+fe5913e58b8ba8fb2db8c3a7fb4aff15e5e77849d6bcc61825f13874d0ffff
+ID: 17361146, parent ID: 16152522, lineage: 11109672, generation: 10
+fe5913e58b8ba8fb2db8c3a7fb4aff15e5e77849d6bcc61825f13874d0ffff
+ID: 16152522, parent ID: 15230377, lineage: 11109672, generation: 9
+fe5913e58b8ba8fb2db8c3a7fb4aff15e5e77849d6bcc61825f13874d0ffff
+ID: 15230377, parent ID: 14734893, lineage: 11109672, generation: 8
+fe5913e58b8ba8fb2db8c3a7fb4aff15e5e77849d6bcc61825f13874d0ffff
+ID: 16856065, parent ID: 16738905, lineage: 11109672, generation: 7
+fe5913e58b8ba8fb2db8c3a7fb4aff15e5e77849d6bcc61825f13874d0ffff
+ID: 15943267, parent ID: 15043658, lineage: 12616387, generation: 8
+71122d595851a8b982ea5166bd97cfca77fac35b5d58000ffff
+ID: 16981354, parent ID: 15813447, lineage: 11109672, generation: 6
+fe5913e58b8ba8fb2db8c3a7fb4aff15e5e77849d6bcc61825f13874d0ffff
+ID: 17333215, parent ID: 17173379, lineage: 11109672, generation: 5
+fe5913e58b8ba8fb2db8c3a7fb4aff15e5e77849d6bcc61825f13874d0ffff
+ID: 17173379, parent ID: 15731935, lineage: 11109672, generation: 4
+fe5913e58b8ba8fb2db8c3a7fb4aff15e5e77849d6bcc61825f13874d0ffff
+ID: 15731935, parent ID: 15383675, lineage: 11109672, generation: 3
+fe5913e58b8ba8fb2db8c3a7fb4aff15e5e77849d6bcc61825f13874d0ffff
