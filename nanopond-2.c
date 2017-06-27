@@ -1143,14 +1143,14 @@ int main(int argc,char **argv)
 			--currCell->energy;
       
 			/* Execute the instruction */
-			//if (falseLoopDepth) {
+			if (falseLoopDepth) {
 				/* Skip forward to matching CLOSE LOOP if we're in a false loop. */
-				//if (inst == 0x9) /* Increment false OPEN LOOP depth */
-					//++falseLoopDepth;
-				//else 
-				//	if (inst == 0xa) /* Decrement on CLOSE LOOP */
-						//--falseLoopDepth;
-			//} else {
+				if (inst == 0x9) /* Increment false OPEN LOOP depth */
+					++falseLoopDepth;
+				else 
+					if (inst == 0xa) /* Decrement on CLOSE LOOP */
+						--falseLoopDepth;
+			} else {
 				/* If we're not in a false OPEN LOOP/CLOSE LOOP, execute normally */
         
 				/* Keep track of execution frequencies for each instruction */
@@ -1203,7 +1203,7 @@ int main(int argc,char **argv)
 						outputBuf[cell_wordPtr] |= cell_register << cell_shiftPtr;
 						break;
 					case 0x9: /* OPEN LOOP: Jump forward to matching CLOSE LOOP if cell_register is zero */
-						//if (cell_register) {
+						if (cell_register) {
 							if (whichLoop >= MAX_NUM_INSTR) {
 								//printf("----------------------STACK OVERFLOW ------------------------------------\n");
                                 				stop = 1; /* Stack overflow ends execution */
@@ -1211,25 +1211,28 @@ int main(int argc,char **argv)
                             				else {
 								// Changed to increment loop stack pointer, then record location of current instr
 								//printf("Successful going into loop\n");
-                                				++whichLoop;
+               
 								loopStack_wordPtr[whichLoop] = wordPtr;
 								loopStack_shiftPtr[whichLoop] = shiftPtr;
+								++whichLoop;
 							}
-						//} else falseLoopDepth = 1;
+						} else falseLoopDepth = 1;
 						break;
 					case 0xa: /* CLOSE LOOP: Jump back to matching OPEN LOOP if cell_register is nonzero */
 						if (whichLoop) {
+							--whichLoop;
 							if (cell_register) {
 								wordPtr = loopStack_wordPtr[whichLoop];
 								shiftPtr = loopStack_shiftPtr[whichLoop];
 								currentWord = currCell->genome[wordPtr];
 								/* This ensures that the OPEN LOOP is rerun */
 								continue;
-							} else {
-								loopStack_wordPtr[whichLoop] = 0;
-								loopStack_shiftPtr[whichLoop] = 0;
-								--whichLoop;
-							}
+							} 
+							//else {
+							//	loopStack_wordPtr[whichLoop] = 0;
+							//	loopStack_shiftPtr[whichLoop] = 0;
+		
+							//}
 						}
 						break;
 					case 0xb: /* TURN: Turn in the direction specified by cell_register */
@@ -1288,7 +1291,7 @@ int main(int argc,char **argv)
 						stop = 1;
 						break;
 				} // end switch
-			//} // end else
+			} // end else
             
             // Reset loopStack pointers and arrays
             
