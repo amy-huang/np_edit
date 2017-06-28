@@ -275,8 +275,8 @@
 #define INFLOW_RATE_VARIATION 8000
 
 /* Size of cellArray in X and Y dimensions. */
-#define POND_SIZE_X 9
-#define POND_SIZE_Y 9
+#define POND_SIZE_X 640
+#define POND_SIZE_Y 480
 
 /* Depth of cellArray in four-bit codons -- this is the maximum
  * genome size. This *must* be a multiple of 16! */
@@ -572,7 +572,7 @@ static void doReport(const uint64_t clock)
 	uintptr_t x,y,wordPtr,shiftPtr,inst,stopCount,i;
 	struct Cell *currCell;
   
-	sprintf(buf,"%lu.report.csv",clock);
+	sprintf(buf,"t%lu.report.csv",clock);
 	d = fopen(buf,"w");
 	if (!d) {
 		fprintf(stderr,"[WARNING] Could not open %s for writing.\n",buf);
