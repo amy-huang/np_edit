@@ -948,7 +948,8 @@ int main(int argc,char **argv)
 			cellArray[x][y].parentID = 0;
 			cellArray[x][y].lineage = 0;
 			cellArray[x][y].generation = 0;
-			cellArray[x][y].energy = 0;
+			//cellArray[x][y].energy = 0;
+			cellArray[x][y].energy = INFLOW_RATE_BASE;
 			for(i=0;i<MAX_WORDS_GENOME;++i)
 				cellArray[x][y].genome[i] = ~((uintptr_t)0);
 		}
