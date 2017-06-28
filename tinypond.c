@@ -953,7 +953,15 @@ int main(int argc,char **argv)
 	/* Main loop */
 	for(;;) {
 
-		/* Increment clock and run updates periodically */
+#ifdef STOP_AT
+		if (clock >= STOP_AT) {
+			fprintf(stderr, "[QUIT] STOP_AT clock value reached. \n");
+			break;
+			
+		}
+#endif
+
+		/* Increment clock and run updates every UPDATE_FREQUENCY amount of clock cycles */
 		/* Clock is incremented at the start, so it starts at 1 */
 		if (!(++clock % UPDATE_FREQUENCY)) {
 			doUpdate(clock);
