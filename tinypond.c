@@ -643,7 +643,9 @@ static void doCycleReport(const uint64_t clock) {
 	for(x=0;x<POND_SIZE_X;++x) {
 		for(y=0;y<POND_SIZE_Y;++y) {
 			currCell = &cellArray[x][y];
-			if (currCell->energy&&(currCell->generation > 0)) {
+			//if (currCell->energy&&(currCell->generation > 0)) {
+			// Print all of the cells, regardless of if they have energy or not
+            if (currCell->energy|| 1) {
 				fprintf(d,"ID: %lu, parent ID: %lu, lineage: %lu, generation: %lu\n",
 					(uint64_t)currCell->ID,
 					(uint64_t)currCell->parentID,
@@ -1002,13 +1004,21 @@ int main(int argc,char **argv)
  
 	// initialize genome to something neutral
 	for (i = 0; i < MAX_WORDS_GENOME; i++) {
-		currCell->genome[i] = 0x3333333333333333;
+		currCell->genome[i] = 0xffffffffffffffff;
 	}
 	
 	// WRITE IN OWN CELL GENOME
-	cellArray[x][y].genome[0] = 0x3be3be3be0393be;
-        cellArray[x][y].genome[1] = 0xbe95813bea3bea3b;
-//        cellArray[x][y].genome[1] = 0x12444345678;
+    char ownInstr[] = "00abcdeabc111";
+    char *p;
+    long long instrNum;
+
+    instrNum = strtol(ownInstr, &p, 16);
+    printf("own instruction is 0x%016x\n", instrNum);
+
+    cellArray[x][y].genome[0] =   0x185185815eb3930;
+    cellArray[x][y].genome[1] =   0x851851851851859;
+    cellArray[x][y].genome[2] =   0xaeb3aeb3185eb31;
+    cellArray[x][y].genome[3] =   0xfffffffffffff3b;
 
 	// OR MAKE THIS CELL'S GENOME RANDOMIZED
 	//for (i = 0; i < MAX_WORDS_GENOME; i++) {
