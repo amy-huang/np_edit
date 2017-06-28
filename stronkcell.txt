@@ -1,0 +1,36 @@
+// turn and share energy with all neighbors 
+inc register
+turn
+share
+inc register
+turn
+share 
+inc register
+turn
+share 
+inc register
+turn
+share 
+// so that copying genome begins at start
+zero pointers, reg
+inc register
+// loop to make sure copy instructions loop keeps goin
+// since loops only end if energy runs out or if reg = 0,
+// change the register and share energy with neighbor
+inc register
+turn
+share energy
+// loop to copy instructions to outputBuf
+begin loop
+	read into reg from genome
+	write from cell reg to buffer
+	inc instr pointers	
+	share energy
+close loop
+turn 
+share energy
+close loop 
+// less energy now, so share again
+inc register
+turn
+share 
