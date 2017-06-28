@@ -255,7 +255,7 @@
  * in the main loop to see what instruction is signified by each
  * four-bit value. */
 #define REPORT_FREQUENCY 10000000
-#define CLOCK_REPORT_FREQUENCY 10
+//#define CLOCK_REPORT_FREQUENCY 10
 
 /* Mutation rate -- range is from 0 (none) to 0xffffffff (all mutations!) */
 /* To get it from a float probability from 0.0 to 1.0, multiply it by
@@ -1041,11 +1041,11 @@ int main(int argc,char **argv)
 	for(;;) {
 
 #ifdef STOP_AT
-		if (clock >= STOP_AT) {
-			fprintf(stderr, "[QUIT] STOP_AT clock value reached. \n");
-			break;
+		//if (clock >= STOP_AT) {
+		//	fprintf(stderr, "[QUIT] STOP_AT clock value reached. \n");
+		//	break;
 			
-		}
+		//}
 #endif
 
 
@@ -1177,11 +1177,11 @@ int main(int argc,char **argv)
 			if ((getRandom() & 0xffffffff) < MUTATION_RATE) {
 				tmp = getRandom(); /* Call getRandom() only once for speed */
 				if (tmp & 0x80) { /* Check for the 8th bit to get random boolean */
-                    printf("mutation: instruction changed!\n");
+                    //printf("mutation: instruction changed!\n");
 					inst = tmp & 0xf; /* Only the first four bits are used here */
                 }
                 else {
-                    printf("mutation: reg changed!\n");
+                    //printf("mutation: reg changed!\n");
 					reg = tmp & 0xf;
 			    }
             }
