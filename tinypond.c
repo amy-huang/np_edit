@@ -240,7 +240,7 @@
 /* ----------------------------------------------------------------------- */
 
 /* Time in seconds after which to stop at. Comment this out to run forever. */
-#define STOP_AT 10
+#define STOP_AT 50
 
 /* Frequency of comprehensive updates-- lower values will provide more
  * info while slowing down the simulation. Higher values will give less
@@ -936,6 +936,7 @@ int main(int argc,char **argv)
   
 	/* Seed and init the random number generator */
 	init_genrand(1234567890);
+	//init_genrand(time(NULL));
 	for(i=0;i<1024;++i)
 		getRandom();
 
@@ -1030,7 +1031,7 @@ int main(int argc,char **argv)
     //cellArray[x][y].genome[0] =   0x331851859eb3930;
     //cellArray[x][y].genome[1] =   0xfaeb3aeb3185eb3;
 
-	cellArray[x][y].genome[0] = 0xfffaae1859eb39e;
+	cellArray[x][y].genome[0] = 0xaae1859eb39e33;
 
 	// OR MAKE THIS CELL'S GENOME RANDOMIZED
 	//for (i = 0; i < MAX_WORDS_GENOME; i++) {
