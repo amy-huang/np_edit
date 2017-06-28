@@ -240,7 +240,7 @@
 /* ----------------------------------------------------------------------- */
 
 /* Time in seconds after which to stop at. Comment this out to run forever. */
-#define STOP_AT 100
+#define STOP_AT 10
 
 /* Frequency of comprehensive updates-- lower values will provide more
  * info while slowing down the simulation. Higher values will give less
@@ -254,13 +254,13 @@
  * semi-human-readable if you look at the big switch() statement
  * in the main loop to see what instruction is signified by each
  * four-bit value. */
-#define REPORT_FREQUENCY 10000000
-//#define CLOCK_REPORT_FREQUENCY 10
+//#define REPORT_FREQUENCY 10000000
+#define CLOCK_REPORT_FREQUENCY 1
 
 /* Mutation rate -- range is from 0 (none) to 0xffffffff (all mutations!) */
 /* To get it from a float probability from 0.0 to 1.0, multiply it by
  * 4294967295 (0xffffffff) and round. */
-#define MUTATION_RATE 21475 /* p=~0.000005 */
+#define MUTATION_RATE 0 /* p=~0.000005 */
 
 /* How frequently should random cells / energy be introduced?
  * Making this too high makes things very chaotic. Making it too low
@@ -1041,11 +1041,11 @@ int main(int argc,char **argv)
 	for(;;) {
 
 #ifdef STOP_AT
-		//if (clock >= STOP_AT) {
-		//	fprintf(stderr, "[QUIT] STOP_AT clock value reached. \n");
-		//	break;
+		if (clock >= STOP_AT) {
+			fprintf(stderr, "[QUIT] STOP_AT clock value reached. \n");
+			break;
 			
-		//}
+		}
 #endif
 
 
@@ -1101,7 +1101,14 @@ int main(int argc,char **argv)
 		if (!(clock % INFLOW_FREQUENCY)) {
 			x = getRandom() % POND_SIZE_X;
 			y = getRandom() % POND_SIZE_Y;
-			currCell = &cellArray[x][y];
+
+            // Make sure not to replace the middle cell
+            //while ((x == (POND_SIZE_X + 1) / 2 )&&(y == (POND_SIZE_Y + 1) / 2 )) {
+			//    x = getRandom() % POND_SIZE_X;
+			//    y = getRandom() % POND_SIZE_Y;
+            //}
+
+            currCell = &cellArray[x][y];
 			currCell->ID = cellIDCounter;
 			currCell->parentID = 0;
 			currCell->lineage = cellIDCounter;
@@ -1132,12 +1139,12 @@ int main(int argc,char **argv)
 			currCell->energy += INFLOW_RATE_BASE;	
 		}
 
+
 		/* Pick a random cell to execute */
-/*
-		x = getRandom() % POND_SIZE_X;
-		y = getRandom() % POND_SIZE_Y;
-		currCell = &cellArray[x][y];
-*/
+		//x = getRandom() % POND_SIZE_X;
+		//y = getRandom() % POND_SIZE_Y;
+		//currCell = &cellArray[x][y];
+
 
 		/* Reset the state of the VM prior to execution */
 		for(i=0;i<MAX_WORDS_GENOME;++i)
