@@ -646,11 +646,12 @@ static void doCycleReport(const uint64_t clock) {
 			//if (currCell->energy&&(currCell->generation > 0)) {
 			// Print all of the cells, regardless of if they have energy or not
             if (currCell->energy|| 1) {
-				fprintf(d,"ID: %lu, parent ID: %lu, lineage: %lu, generation: %lu\n",
+				fprintf(d,"ID: %lu, parent ID: %lu, lineage: %lu, generation: %lu, energy: %lu\n",
 					(uint64_t)currCell->ID,
 					(uint64_t)currCell->parentID,
 					(uint64_t)currCell->lineage,
-					(uint64_t)currCell->generation);
+					(uint64_t)currCell->generation,
+					(uint64_t)currCell->energy);
 				wordPtr = 0;
 				shiftPtr = 0;
 				stopCount = 0;
@@ -1008,17 +1009,26 @@ int main(int argc,char **argv)
 	}
 	
 	// WRITE IN OWN CELL GENOME
+    /*
     char ownInstr[] = "00abcdeabc111";
     char *p;
     long long instrNum;
-
     instrNum = strtol(ownInstr, &p, 16);
     printf("own instruction is 0x%016x\n", instrNum);
+    */
+    /* 
+    cellArray[x][y].genome[0] =   0xeeeeebbb3999300;
+    cellArray[x][y].genome[1] =   0x888888855555999;
+    cellArray[x][y].genome[2] =   0xeebbb3300033111;
+    cellArray[x][y].genome[3] =   0x88888885555eeee;
+    cellArray[x][y].genome[4] =   0xeeeebbbb3333111;
+    cellArray[x][y].genome[5] =   0xeeebb3333aaaeee;
+    cellArray[x][y].genome[6] =   0xffffffffffaaaee;
+    */
 
-    cellArray[x][y].genome[0] =   0x185185815eb3930;
-    cellArray[x][y].genome[1] =   0x851851851851859;
-    cellArray[x][y].genome[2] =   0xaeb3aeb3185eb31;
-    cellArray[x][y].genome[3] =   0xfffffffffffff3b;
+    cellArray[x][y].genome[0] =   0x331851859eb3930;
+    cellArray[x][y].genome[1] =   0xfaeb3aeb3185eb3;
+
 
 	// OR MAKE THIS CELL'S GENOME RANDOMIZED
 	//for (i = 0; i < MAX_WORDS_GENOME; i++) {
@@ -1163,11 +1173,15 @@ int main(int argc,char **argv)
 			* ranges of the genome, etc. */
 			if ((getRandom() & 0xffffffff) < MUTATION_RATE) {
 				tmp = getRandom(); /* Call getRandom() only once for speed */
-				if (tmp & 0x80) /* Check for the 8th bit to get random boolean */
+				if (tmp & 0x80) { /* Check for the 8th bit to get random boolean */
+                    printf("mutation: instruction changed!\n");
 					inst = tmp & 0xf; /* Only the first four bits are used here */
-				else 
+                }
+                else {
+                    printf("mutation: reg changed!\n");
 					reg = tmp & 0xf;
-			}
+			    }
+            }
       
 			/* Each instruction processed costs one unit of energy */
 			--currCell->energy;
