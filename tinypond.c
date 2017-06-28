@@ -275,8 +275,8 @@
 #define INFLOW_RATE_VARIATION 8000
 
 /* Size of cellArray in X and Y dimensions. */
-#define POND_SIZE_X 640
-#define POND_SIZE_Y 480
+#define POND_SIZE_X 9
+#define POND_SIZE_Y 9
 
 /* Depth of cellArray in four-bit codons -- this is the maximum
  * genome size. This *must* be a multiple of 16! */
@@ -623,7 +623,7 @@ static void doReport(const uint64_t clock)
 }
 
 /**
- * Reports all viable (generation > 0) cells to a file called <clock>.report
+ * Reports all living (generation > 0) cells to a file called <clock>.report
  */
 static void doCycleReport(const uint64_t clock) {
 	char buf[MAX_NUM_INSTR*2];
@@ -956,7 +956,7 @@ int main(int argc,char **argv)
   
     uint64_t clock = 0;		/* Clock is incremented on each core loop */
   
-	uint64_t cellIdCounter = 0;	/* This is used to generate unique cell IDs */
+	uint64_t cellIDCounter = 0;	/* This is used to generate unique cell IDs */
   
 	uintptr_t currentWord,wordPtr,shiftPtr,inst,tmp;/* Miscellaneous variables */
 	struct Cell *currCell,*neighborCell;			/* used in the loop */
@@ -990,13 +990,13 @@ int main(int argc,char **argv)
 
 
 	/* IMPLANT A SINGLE GENOME IN THE CENTER CELL */
-/*	x = (POND_SIZE_X + 1) /2;
+	x = (POND_SIZE_X + 1) /2;
 	y = (POND_SIZE_Y + 1) / 2;
 	currCell = &cellArray[x][y];
 	currCell->ID = cellIDCounter;
 	currCell->parentID = 0;
-	currCell->lineage = cellIdCounter;
-        currCell->generation = 0;
+	currCell->lineage = cellIDCounter;
+        currCell->generation = 1;
         currCell->energy += INFLOW_RATE_BASE;
         
 	// WRITE IN OWN CELL GENOME
@@ -1007,7 +1007,7 @@ int main(int argc,char **argv)
 	for (i = 0; i < MAX_WORDS_GENOME; i++) {
 		currCell->genome[i] = getRandom();
 	}
-*/
+
 
 	/* Main loop */
 	for(;;) {
@@ -1067,14 +1067,14 @@ int main(int argc,char **argv)
 		/* This is called seeding, and introduces both energy and
 		* entropy into the substrate. This happens every INFLOW_FREQUENCY
 		* clock ticks. */
-
+/*
 		if (!(clock % INFLOW_FREQUENCY)) {
 			x = getRandom() % POND_SIZE_X;
 			y = getRandom() % POND_SIZE_Y;
 			currCell = &cellArray[x][y];
-			currCell->ID = cellIdCounter;
+			currCell->ID = cellIDCounter;
 			currCell->parentID = 0;
-			currCell->lineage = cellIdCounter;
+			currCell->lineage = cellIDCounter;
 			currCell->generation = 0;
 #ifdef INFLOW_RATE_VARIATION
 			currCell->energy += INFLOW_RATE_BASE + (getRandom() % INFLOW_RATE_VARIATION);
@@ -1083,7 +1083,7 @@ int main(int argc,char **argv)
 #endif 
 			for(i=0;i<MAX_WORDS_GENOME;++i) 
 				currCell->genome[i] = getRandom();
-			++cellIdCounter;
+			++cellIDCounter;
       
       // Update the random cell on SDL screen if viz is enabled 
 #ifdef USE_SDL_NOTYET
@@ -1095,7 +1095,7 @@ int main(int argc,char **argv)
 				SDL_UnlockSurface(screen);
 #endif 
 		}
-
+*/
 
 		/* Bring in energy */  
 	  	//if (!(clock % INFLOW_FREQUENCY)) {
@@ -1103,9 +1103,11 @@ int main(int argc,char **argv)
 		//}
 
 		/* Pick a random cell to execute */
+/*
 		x = getRandom() % POND_SIZE_X;
 		y = getRandom() % POND_SIZE_Y;
 		currCell = &cellArray[x][y];
+*/
 
 		/* Reset the state of the VM prior to execution */
 		for(i=0;i<MAX_WORDS_GENOME;++i)
@@ -1261,11 +1263,11 @@ int main(int argc,char **argv)
 							/* Filling first two words with 0xfffff... is enough */
 							neighborCell->genome[0] = ~((uintptr_t)0);
 							neighborCell->genome[1] = ~((uintptr_t)0);
-							neighborCell->ID = cellIdCounter;
+							neighborCell->ID = cellIDCounter;
 							neighborCell->parentID = 0;
-							neighborCell->lineage = cellIdCounter;
+							neighborCell->lineage = cellIDCounter;
 							neighborCell->generation = 0;
-							++cellIdCounter;
+							++cellIDCounter;
 						} else {
 							if (neighborCell->generation > 2) {
 								tmp = currCell->energy / FAILED_KILL_PENALTY;
@@ -1318,7 +1320,7 @@ int main(int argc,char **argv)
 					++statCounters.viableCellsReplaced;
                 
                 // Generate new cell ID and set parent ID, lineage, generation accordingly
-				neighborCell->ID = ++cellIdCounter;
+				neighborCell->ID = ++cellIDCounter;
 				neighborCell->parentID = currCell->ID;
 				neighborCell->lineage = currCell->lineage; /* Lineage is copied in offspring */
 				neighborCell->generation = currCell->generation + 1;
