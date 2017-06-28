@@ -267,7 +267,7 @@
 #define INFLOW_FREQUENCY 100
 
 /* Base amount of energy to introduce per INFLOW_FREQUENCY ticks */
-#define INFLOW_RATE_BASE 4000
+#define INFLOW_RATE_BASE 40000000
 
 /* A random amount of energy between 0 and this is added to
  * INFLOW_RATE_BASE when energy is introduced. Comment this out for
@@ -998,15 +998,21 @@ int main(int argc,char **argv)
 	currCell->lineage = cellIDCounter;
         currCell->generation = 1;
         currCell->energy += INFLOW_RATE_BASE;
-        
+ 
+	// initialize genome to something neutral
+	for (i = 0; i < MAX_WORDS_GENOME; i++) {
+		currCell->genome[i] = 0x3333333333333333;
+	}
+	
 	// WRITE IN OWN CELL GENOME
-	//cellArray[x][y].genome[0] = 0x1234567812345678123456781234567812345678123456781234567812345678;
-        //cellArray[x][y].genome[1] = 0x12444345678;
+	cellArray[x][y].genome[0] = 0x3be3be3be0393be;
+        cellArray[x][y].genome[1] = 0xbe95813bea3bea3b;
+//        cellArray[x][y].genome[1] = 0x12444345678;
 
 	// OR MAKE THIS CELL'S GENOME RANDOMIZED
-	for (i = 0; i < MAX_WORDS_GENOME; i++) {
-		currCell->genome[i] = getRandom();
-	}
+	//for (i = 0; i < MAX_WORDS_GENOME; i++) {
+	//	currCell->genome[i] = getRandom();
+	//}
 
 
 	/* Main loop */
@@ -1098,9 +1104,9 @@ int main(int argc,char **argv)
 */
 
 		/* Bring in energy */  
-	  	//if (!(clock % INFLOW_FREQUENCY)) {
-		//	currCell->energy += INFLOW_RATE_BASE;	
-		//}
+	  	if (!(clock % INFLOW_FREQUENCY)) {
+			currCell->energy += INFLOW_RATE_BASE;	
+		}
 
 		/* Pick a random cell to execute */
 /*
