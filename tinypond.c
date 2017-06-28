@@ -240,7 +240,7 @@
 /* ----------------------------------------------------------------------- */
 
 /* Time in seconds after which to stop at. Comment this out to run forever. */
-#define STOP_AT 10
+#define STOP_AT 100
 
 /* Frequency of comprehensive updates-- lower values will provide more
  * info while slowing down the simulation. Higher values will give less
@@ -255,6 +255,7 @@
  * in the main loop to see what instruction is signified by each
  * four-bit value. */
 #define REPORT_FREQUENCY 10000000
+#define CLOCK_REPORT_FREQUENCY 10
 
 /* Mutation rate -- range is from 0 (none) to 0xffffffff (all mutations!) */
 /* To get it from a float probability from 0.0 to 1.0, multiply it by
@@ -1047,8 +1048,6 @@ int main(int argc,char **argv)
 		}
 #endif
 
-		/* Do cycle report every iteration of this loop */
-		doCycleReport(clock);
 
 		/* Increment clock and run updates every UPDATE_FREQUENCY amount of clock cycles */
 		/* Clock is incremented at the start, so it starts at 1 */
@@ -1088,8 +1087,12 @@ int main(int argc,char **argv)
 			doReport(clock);
 #endif /* REPORT_FREQUENCY */
 
-
-
+#ifdef CLOCK_REPORT_FREQUENCY
+		/* Do cycle report every iteration of this loop */
+		if (!(clock % CLOCK_REPORT_FREQUENCY)) {
+            doCycleReport(clock);
+        }
+#endif
 		/* Introduce a random cell somewhere with a given energy level */
 		/* This is called seeding, and introduces both energy and
 		* entropy into the substrate. This happens every INFLOW_FREQUENCY
