@@ -1027,9 +1027,10 @@ int main(int argc,char **argv)
     cellArray[x][y].genome[6] =   0xffffffffffaaaee;
     */
 
-    cellArray[x][y].genome[0] =   0x331851859eb3930;
-    cellArray[x][y].genome[1] =   0xfaeb3aeb3185eb3;
+    //cellArray[x][y].genome[0] =   0x331851859eb3930;
+    //cellArray[x][y].genome[1] =   0xfaeb3aeb3185eb3;
 
+	cellArray[x][y].genome[0] = 0xfffaae1859eb39e;
 
 	// OR MAKE THIS CELL'S GENOME RANDOMIZED
 	//for (i = 0; i < MAX_WORDS_GENOME; i++) {
@@ -1355,7 +1356,8 @@ int main(int argc,char **argv)
 		* junk eventually. See the seeding code in the main loop above. */
 		if ((outputBuf[0] & 0xff) != 0xff) {
             neighborCell = getNeighbor(x,y,facing);
-			if ((neighborCell->energy)&&accessAllowed(neighborCell,reg,0)) {
+			//if ((neighborCell->energy)&&accessAllowed(neighborCell,reg,0)) {
+			if ((neighborCell->energy)) {
 				/* If replacing a viable cell, update relevant stats for update */
 				if (neighborCell->generation > 2)
 					++statCounters.viableCellsReplaced;
