@@ -34,3 +34,6 @@ close loop
 inc register
 turn
 share 
+
+GENOME IN LEFT TO RIGHT ORDER:
+039993bbbbeeeeeee9995555558888888881113303bbbeeeeee55558888888888111333bbbbbeeeeeeeeaaa3333bbeeeeaaaf0ffff
