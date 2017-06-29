@@ -884,7 +884,11 @@ int main(int argc,char **argv)
     }
     printf("20 random numbers: ");
     for (i = 0; i < 20; i++) {
-        printf("%u  ", genrand_int32());    
+        printf("%u  ", getRandom());    
+    }
+    printf("20 random numbers: ");
+    for (i = 0; i < 20; i++) {
+        printf("%u  ", getRandom());    
     }
     printf("\n");
 	
