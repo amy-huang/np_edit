@@ -877,6 +877,16 @@ int main(int argc,char **argv)
 	init_genrand(1234567890);
 	for(i=0;i<1024;++i)
 		getRandom();
+    // random num generating prints
+    printf("20 random numbers: ");
+    for (i = 0; i < 20; i++) {
+        printf("%lu  ", getRandom());    
+    }
+    printf("20 random numbers: ");
+    for (i = 0; i < 20; i++) {
+        printf("%u  ", genrand_int32());    
+    }
+    printf("\n");
 	
     /* Reset per-update stat counters */
 	for(x=0;x<sizeof(statCounters);++x)
@@ -944,7 +954,7 @@ int main(int argc,char **argv)
 		/* Increment clock and run updates periodically */
 		/* Clock is incremented at the start, so it starts at 1 */
 		if (!(++clock % UPDATE_FREQUENCY)) {
-			doUpdate(clock);
+			//doUpdate(clock);
 #ifdef USE_SDL
 			/* SDL display is also refreshed every UPDATE_FREQUENCY */
 			while (SDL_PollEvent(&sdlEvent)) {
