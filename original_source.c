@@ -382,7 +382,6 @@ static void init_genrand(unsigned long s)
 }
 
 /* generates a random number on [0,0xffffffff]-interval */
-/* needs to go unused because for testing we want a fixed seed!*/
 static inline uint32_t genrand_int32() {
 	uint32_t y;
 	static uint32_t mag01[2]={0x0UL, MATRIX_A};
@@ -460,7 +459,7 @@ enum { KINSHIP,LINEAGE,MAX_COLOR_SCHEME } colorScheme = KINSHIP;
 const char *colorSchemeName[2] = { "KINSHIP", "LINEAGE" };
 
 /**
- * Get a random number
+ * Get a random number - for 64 bit machines; shifts and adds 2 32 bit numbers
  *
  * @return Random number
  */
@@ -470,7 +469,8 @@ static inline uintptr_t getRandom()
 	/* This is to make it work on 64-bit boxes */
 	if (sizeof(uintptr_t) == 8)
 		return (uintptr_t)((((uint64_t)genrand_int32()) << 32) ^ ((uint64_t)genrand_int32()));
-	else 
+	// For regular 32 bit boxes
+    else 
 		return (uintptr_t)genrand_int32();
 }
 
@@ -942,7 +942,7 @@ int main(int argc,char **argv)
 		/* Increment clock and run updates periodically */
 		/* Clock is incremented at the start, so it starts at 1 */
 		if (!(++clock % UPDATE_FREQUENCY)) {
-			doUpdate(clock);
+			//doUpdate(clock);
 #ifdef USE_SDL
 			/* SDL display is also refreshed every UPDATE_FREQUENCY */
 			while (SDL_PollEvent(&sdlEvent)) {
