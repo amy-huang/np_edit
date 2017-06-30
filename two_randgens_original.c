@@ -859,7 +859,7 @@ static void RedrawScreen(){
 
 #endif
 
-static void timeHandler(struct itimerval tval) {
+static void timeHandler(struct timeval tval) {
 #ifdef STOP_AT
 	printf("\n Time is up. %d seconds have passed.\n", STOP_AT);
 #endif
@@ -874,25 +874,53 @@ int main(int argc,char **argv)
 	uintptr_t i,x,y;
     
 
-
+// Set timer to end program via system interrupt
 #ifdef STOP_AT
-	struct itimerval tvalStop;
-	tvalStop.it_value.tv_sec = STOP_AT;
+	struct timeval tvalStop;
+	tvalStop.tv_sec = STOP_AT;
 
-	(void) signal(SIGALRM, timeHandler);
-	(void) setitimer(ITIMER_REAL, &tvalStop, NULL);
+	signal(SIGALRM, timeHandler);
+	setitimer(ITIMER_REAL, &tvalStop, NULL);
 #endif
-
-
   
 	/* Buffer used for execution output of candidate offspring */
 	uintptr_t outputBuf[MAX_WORDS_GENOME];
-  
+
+
 	/* Seed and init the random number generator */
 	init_genrand(&cellPickStruct, 1234567890);
 	for(i=0;i<1024;++i)
 		getRandom(&cellPickStruct);
-    // random num generating prints
+
+	struct timeval fcnStart;
+	struct timeval fcnStop;
+	gettimeofday(&fcnStart, NULL);
+	sleep(10);
+	gettimeofday(&fcnStop, NULL);
+	printf("1st time: %lf 2nd time: %lf difference: %lf \n", (float) fcnStart.tv_sec, (float) fcnStop.tv_sec, (float) fcnStop.tv_sec - fcnStart.tv_sec);	
+
+/* 
+	// record time before init function starts 
+	const struct timeval fcnStart, fcnStop;
+	settimeofday(&fcnStart, NULL);
+	printf("time before init: %lf\n", (float) fcnStart.tv_usec);
+	
+	// Seed and init the random number generator 
+	init_genrand(&cellPickStruct, 1234567890);
+	for(i=0;i<1024;++i)
+		getRandom(&cellPickStruct);
+	
+	// record time after function has finished
+	settimeofday(&fcnStop, NULL);
+	printf("time after init: %lf\n", (float) fcnStop.tv_usec);
+	printf("time taken to initialize RNG: %lf\n", 
+	//	(fcnStop.tv_sec - fcnStart.tv_sec) + (fcnStop.tv_usec - fcnStart.tv_usec)/1000000.0);    	
+//	 (float)	(fcnStop.tv_sec - fcnStart.tv_sec) );    	
+		(fcnStop.tv_usec - fcnStart.tv_usec)/1000000.0);    	
+*/
+
+
+// random num generating prints
 /*
     printf("20 random numbers: ");
     for (i = 0; i < 20; i++) {
