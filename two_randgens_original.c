@@ -363,14 +363,25 @@
 #define UPPER_MASK 0x80000000UL /* most significant w-r bits */
 #define LOWER_MASK 0x7fffffffUL /* least significant r bits */
 
-static unsigned long mt[N]; /* the array for the state vector  */
-static unsigned long mt1[N]; /* the array for the state vector  */
+static unsigned long cellPick[N]; /* the array for the state vector  */
+//static unsigned long mt1[N]; /* the array for the state vector  */
 static int mti=N+1; /* mti==N+1 means mt[N] is not initialized */
-static int mti1=N+1; /* mti==N+1 means mt[N] is not initialized */
+//static int mti1=N+1; /* mti==N+1 means mt[N] is not initialized */
+
+struct randomGenerator {
+	unsigned long numArray[N];
+	int currIndex;
+};
+
+struct randomGenerator cellPickStruct = { .currIndex = N + 1};
+//struct randomGenerator cellPickStruct;
 
 /* initializes mt[N] with a seed */
-static void init_genrand(int useMT, unsigned long s)
+static void init_genrand(struct randomGenerator *rgStruct, unsigned long s)
 {
+	unsigned long *mt = rgStruct->numArray;
+	int mti = rgStruct->currIndex;
+
 	mt[0]= s & 0xffffffffUL;
 	for (mti=1; mti<N; mti++) {
 	mt[mti] = (1812433253UL * (mt[mti-1] ^ (mt[mti-1] >> 30)) + mti); 
@@ -384,9 +395,11 @@ static void init_genrand(int useMT, unsigned long s)
 }
 
 /* generates a random number on [0,0xffffffff]-interval */
-static inline uint32_t genrand_int32(int useMT) {
+static inline uint32_t genrand_int32(struct randomGenerator *rgStruct) {
 	uint32_t y;
 	static uint32_t mag01[2]={0x0UL, MATRIX_A};
+	unsigned long *mt = rgStruct->numArray;
+	int mti = rgStruct->currIndex;
 	/* mag01[x] = x * MATRIX_A  for x=0,1 */
 
 	if (mti >= N) { /* generate N words at one time */
@@ -465,15 +478,15 @@ const char *colorSchemeName[2] = { "KINSHIP", "LINEAGE" };
  *
  * @return Random number
  */
-static inline uintptr_t getRandom(int useMT)
+static inline uintptr_t getRandom()
 {
 	/* A good optimizing compiler should optimize out this if */
 	/* This is to make it work on 64-bit boxes */
 	if (sizeof(uintptr_t) == 8)
-		return (uintptr_t)((((uint64_t)genrand_int32(1)) << 32) ^ ((uint64_t)genrand_int32(1)));
+		return (uintptr_t)((((uint64_t)genrand_int32(&cellPickStruct)) << 32) ^ ((uint64_t)genrand_int32(&cellPickStruct)));
 	// For regular 32 bit boxes
     else 
-		return (uintptr_t)genrand_int32(1);
+		return (uintptr_t)genrand_int32(&cellPickStruct);
 }
 
 /**
@@ -686,9 +699,9 @@ static inline int accessAllowed(struct Cell *const c2,const uintptr_t c1guess,in
 	* and more probable if they are different in sense 1. Sense 0 is used for
 	* "negative" interactions and sense 1 for "positive" ones. */
 	return sense 
-		? (((getRandom(1) & 0xf) >= 
+		? (((getRandom() & 0xf) >= 
 			BITS_IN_FOURBIT_WORD[(c2->genome[0] & 0xf) ^ (c1guess & 0xf)])||(!c2->parentID)) 
-		: (((getRandom(1) & 0xf) <= 
+		: (((getRandom() & 0xf) <= 
 			BITS_IN_FOURBIT_WORD[(c2->genome[0] & 0xf) ^ (c1guess & 0xf)])||(!c2->parentID));
 }
 
@@ -876,22 +889,22 @@ int main(int argc,char **argv)
 	uintptr_t outputBuf[MAX_WORDS_GENOME];
   
 	/* Seed and init the random number generator */
-	init_genrand(1, 1234567890);
+	init_genrand(&cellPickStruct, 1234567890);
 	for(i=0;i<1024;++i)
-		getRandom(1);
+		getRandom(&cellPickStruct);
     // random num generating prints
 /*
     printf("20 random numbers: ");
     for (i = 0; i < 20; i++) {
-        printf("%lu  ", getRandom(1));    
+        printf("%lu  ", getRandom());    
     }
     printf("20 random numbers: ");
     for (i = 0; i < 20; i++) {
-        printf("%u  ", getRandom(1));    
+        printf("%u  ", getRandom());    
     }
     printf("20 random numbers: ");
     for (i = 0; i < 20; i++) {
-        printf("%u  ", getRandom(1));    
+        printf("%u  ", getRandom());    
     }
     printf("\n");
 */
@@ -962,7 +975,7 @@ int main(int argc,char **argv)
 		/* Increment clock and run updates periodically */
 		/* Clock is incremented at the start, so it starts at 1 */
 		if (!(++clock % UPDATE_FREQUENCY)) {
-			//doUpdate(clock);
+			doUpdate(clock);
 #ifdef USE_SDL
 			/* SDL display is also refreshed every UPDATE_FREQUENCY */
 			while (SDL_PollEvent(&sdlEvent)) {
@@ -1002,20 +1015,20 @@ int main(int argc,char **argv)
 		* entropy into the substrate. This happens every INFLOW_FREQUENCY
 		* clock ticks. */
 		if (!(clock % INFLOW_FREQUENCY)) {
-			x = getRandom(1) % POND_SIZE_X;
-			y = getRandom(1) % POND_SIZE_Y;
+			x = getRandom() % POND_SIZE_X;
+			y = getRandom() % POND_SIZE_Y;
 			currCell = &cellArray[x][y];
 			currCell->ID = cellIdCounter;
 			currCell->parentID = 0;
 			currCell->lineage = cellIdCounter;
 			currCell->generation = 0;
 #ifdef INFLOW_RATE_VARIATION
-			currCell->energy += INFLOW_RATE_BASE + (getRandom(1) % INFLOW_RATE_VARIATION);
+			currCell->energy += INFLOW_RATE_BASE + (getRandom() % INFLOW_RATE_VARIATION);
 #else
 			currCell->energy += INFLOW_RATE_BASE;
 #endif /* INFLOW_RATE_VARIATION */
 			for(i=0;i<MAX_WORDS_GENOME;++i) 
-				currCell->genome[i] = getRandom(1);
+				currCell->genome[i] = getRandom();
 			++cellIdCounter;
       
       /* Update the random cell on SDL screen if viz is enabled */
@@ -1030,8 +1043,8 @@ int main(int argc,char **argv)
 		}
     
 		/* Pick a random cell to execute */
-		x = getRandom(1) % POND_SIZE_X;
-		y = getRandom(1) % POND_SIZE_Y;
+		x = getRandom() % POND_SIZE_X;
+		y = getRandom() % POND_SIZE_Y;
 		currCell = &cellArray[x][y];
 
 		/* Reset the state of the VM prior to execution */
@@ -1069,8 +1082,8 @@ int main(int argc,char **argv)
 			* it can have all manner of different effects on the end result of
 			* replication: insertions, deletions, duplications of entire
 			* ranges of the genome, etc. */
-			if ((getRandom(1) & 0xffffffff) < MUTATION_RATE) {
-				tmp = getRandom(1); /* Call getRandom(1) only once for speed */
+			if ((getRandom() & 0xffffffff) < MUTATION_RATE) {
+				tmp = getRandom(); /* Call getRandom() only once for speed */
 				if (tmp & 0x80) /* Check for the 8th bit to get random boolean */
 					inst = tmp & 0xf; /* Only the first four bits are used here */
 				else 
