@@ -364,10 +364,12 @@
 #define LOWER_MASK 0x7fffffffUL /* least significant r bits */
 
 static unsigned long mt[N]; /* the array for the state vector  */
+static unsigned long mt1[N]; /* the array for the state vector  */
 static int mti=N+1; /* mti==N+1 means mt[N] is not initialized */
+static int mti1=N+1; /* mti==N+1 means mt[N] is not initialized */
 
 /* initializes mt[N] with a seed */
-static void init_genrand(unsigned long s)
+static void init_genrand(int useMT, unsigned long s)
 {
 	mt[0]= s & 0xffffffffUL;
 	for (mti=1; mti<N; mti++) {
@@ -382,7 +384,7 @@ static void init_genrand(unsigned long s)
 }
 
 /* generates a random number on [0,0xffffffff]-interval */
-static inline uint32_t genrand_int32() {
+static inline uint32_t genrand_int32(int useMT) {
 	uint32_t y;
 	static uint32_t mag01[2]={0x0UL, MATRIX_A};
 	/* mag01[x] = x * MATRIX_A  for x=0,1 */
@@ -463,15 +465,15 @@ const char *colorSchemeName[2] = { "KINSHIP", "LINEAGE" };
  *
  * @return Random number
  */
-static inline uintptr_t getRandom()
+static inline uintptr_t getRandom(int useMT)
 {
 	/* A good optimizing compiler should optimize out this if */
 	/* This is to make it work on 64-bit boxes */
 	if (sizeof(uintptr_t) == 8)
-		return (uintptr_t)((((uint64_t)genrand_int32()) << 32) ^ ((uint64_t)genrand_int32()));
+		return (uintptr_t)((((uint64_t)genrand_int32(1)) << 32) ^ ((uint64_t)genrand_int32(1)));
 	// For regular 32 bit boxes
     else 
-		return (uintptr_t)genrand_int32();
+		return (uintptr_t)genrand_int32(1);
 }
 
 /**
@@ -684,9 +686,9 @@ static inline int accessAllowed(struct Cell *const c2,const uintptr_t c1guess,in
 	* and more probable if they are different in sense 1. Sense 0 is used for
 	* "negative" interactions and sense 1 for "positive" ones. */
 	return sense 
-		? (((getRandom() & 0xf) >= 
+		? (((getRandom(1) & 0xf) >= 
 			BITS_IN_FOURBIT_WORD[(c2->genome[0] & 0xf) ^ (c1guess & 0xf)])||(!c2->parentID)) 
-		: (((getRandom() & 0xf) <= 
+		: (((getRandom(1) & 0xf) <= 
 			BITS_IN_FOURBIT_WORD[(c2->genome[0] & 0xf) ^ (c1guess & 0xf)])||(!c2->parentID));
 }
 
@@ -874,23 +876,25 @@ int main(int argc,char **argv)
 	uintptr_t outputBuf[MAX_WORDS_GENOME];
   
 	/* Seed and init the random number generator */
-	init_genrand(1234567890);
+	init_genrand(1, 1234567890);
 	for(i=0;i<1024;++i)
-		getRandom();
+		getRandom(1);
     // random num generating prints
+/*
     printf("20 random numbers: ");
     for (i = 0; i < 20; i++) {
-        printf("%lu  ", getRandom());    
+        printf("%lu  ", getRandom(1));    
     }
     printf("20 random numbers: ");
     for (i = 0; i < 20; i++) {
-        printf("%u  ", getRandom());    
+        printf("%u  ", getRandom(1));    
     }
     printf("20 random numbers: ");
     for (i = 0; i < 20; i++) {
-        printf("%u  ", getRandom());    
+        printf("%u  ", getRandom(1));    
     }
     printf("\n");
+*/
 	
     /* Reset per-update stat counters */
 	for(x=0;x<sizeof(statCounters);++x)
@@ -998,20 +1002,20 @@ int main(int argc,char **argv)
 		* entropy into the substrate. This happens every INFLOW_FREQUENCY
 		* clock ticks. */
 		if (!(clock % INFLOW_FREQUENCY)) {
-			x = getRandom() % POND_SIZE_X;
-			y = getRandom() % POND_SIZE_Y;
+			x = getRandom(1) % POND_SIZE_X;
+			y = getRandom(1) % POND_SIZE_Y;
 			currCell = &cellArray[x][y];
 			currCell->ID = cellIdCounter;
 			currCell->parentID = 0;
 			currCell->lineage = cellIdCounter;
 			currCell->generation = 0;
 #ifdef INFLOW_RATE_VARIATION
-			currCell->energy += INFLOW_RATE_BASE + (getRandom() % INFLOW_RATE_VARIATION);
+			currCell->energy += INFLOW_RATE_BASE + (getRandom(1) % INFLOW_RATE_VARIATION);
 #else
 			currCell->energy += INFLOW_RATE_BASE;
 #endif /* INFLOW_RATE_VARIATION */
 			for(i=0;i<MAX_WORDS_GENOME;++i) 
-				currCell->genome[i] = getRandom();
+				currCell->genome[i] = getRandom(1);
 			++cellIdCounter;
       
       /* Update the random cell on SDL screen if viz is enabled */
@@ -1026,8 +1030,8 @@ int main(int argc,char **argv)
 		}
     
 		/* Pick a random cell to execute */
-		x = getRandom() % POND_SIZE_X;
-		y = getRandom() % POND_SIZE_Y;
+		x = getRandom(1) % POND_SIZE_X;
+		y = getRandom(1) % POND_SIZE_Y;
 		currCell = &cellArray[x][y];
 
 		/* Reset the state of the VM prior to execution */
@@ -1065,8 +1069,8 @@ int main(int argc,char **argv)
 			* it can have all manner of different effects on the end result of
 			* replication: insertions, deletions, duplications of entire
 			* ranges of the genome, etc. */
-			if ((getRandom() & 0xffffffff) < MUTATION_RATE) {
-				tmp = getRandom(); /* Call getRandom() only once for speed */
+			if ((getRandom(1) & 0xffffffff) < MUTATION_RATE) {
+				tmp = getRandom(1); /* Call getRandom(1) only once for speed */
 				if (tmp & 0x80) /* Check for the 8th bit to get random boolean */
 					inst = tmp & 0xf; /* Only the first four bits are used here */
 				else 
