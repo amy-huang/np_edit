@@ -886,39 +886,17 @@ int main(int argc,char **argv)
 	/* Buffer used for execution output of candidate offspring */
 	uintptr_t outputBuf[MAX_WORDS_GENOME];
 
-
 	/* Seed and init the random number generator */
-	init_genrand(&cellPickStruct, 1234567890);
-	for(i=0;i<1024;++i)
-		getRandom(&cellPickStruct);
-
-	struct timeval fcnStart;
-	struct timeval fcnStop;
+	struct timeval fcnStart, fcnStop;
 	gettimeofday(&fcnStart, NULL);
-	sleep(10);
-	gettimeofday(&fcnStop, NULL);
-	printf("1st time: %lf 2nd time: %lf difference: %lf \n", (float) fcnStart.tv_sec, (float) fcnStop.tv_sec, (float) fcnStop.tv_sec - fcnStart.tv_sec);	
-
-/* 
-	// record time before init function starts 
-	const struct timeval fcnStart, fcnStop;
-	settimeofday(&fcnStart, NULL);
-	printf("time before init: %lf\n", (float) fcnStart.tv_usec);
 	
-	// Seed and init the random number generator 
 	init_genrand(&cellPickStruct, 1234567890);
 	for(i=0;i<1024;++i)
 		getRandom(&cellPickStruct);
-	
-	// record time after function has finished
-	settimeofday(&fcnStop, NULL);
-	printf("time after init: %lf\n", (float) fcnStop.tv_usec);
-	printf("time taken to initialize RNG: %lf\n", 
-	//	(fcnStop.tv_sec - fcnStart.tv_sec) + (fcnStop.tv_usec - fcnStart.tv_usec)/1000000.0);    	
-//	 (float)	(fcnStop.tv_sec - fcnStart.tv_sec) );    	
-		(fcnStop.tv_usec - fcnStart.tv_usec)/1000000.0);    	
-*/
 
+	gettimeofday(&fcnStop, NULL);
+	// print out times before and after function, and then the difference
+	printf("1st time: %lf 2nd time: %lf difference: %lf \n", (float) fcnStart.tv_sec, (float) fcnStop.tv_sec, (fcnStop.tv_sec - fcnStart.tv_sec) + (fcnStop.tv_usec - fcnStart.tv_usec)/1000000.0);	
 
 // random num generating prints
 /*
