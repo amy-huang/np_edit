@@ -255,6 +255,7 @@
  * in the main loop to see what instruction is signified by each
  * four-bit value. */
 #define REPORT_FREQUENCY 10000000
+#define CYCLE_REPORT_FREQUENCY 10
 
 /* Mutation rate -- range is from 0 (none) to 0xffffffff (all mutations!) */
 /* To get it from a float probability from 0.0 to 1.0, multiply it by
@@ -622,6 +623,68 @@ static void doReport(const uint64_t clock)
 	fclose(d);
 }
 
+
+/**
+ * Reports all viable (generation > 2) cells to a file called <clock>.report
+ */
+static void doCycleReport(const uint64_t clock)
+{
+	char buf[MAX_NUM_INSTR*2];
+	FILE *d;
+	uintptr_t x,y,wordPtr,shiftPtr,inst,stopCount,i;
+	struct Cell *currCell;
+  
+	sprintf(buf,"o%lu.cycleReport.csv",clock);
+	d = fopen(buf,"w");
+	if (!d) {
+		fprintf(stderr,"[WARNING] Could not open %s for writing.\n",buf);
+		return;
+	}
+  
+	fprintf(stderr,"[INFO] Reporting viable cells to %s\n",buf);
+  
+	for(x=0;x<POND_SIZE_X;++x) {
+		for(y=0;y<POND_SIZE_Y;++y) {
+			currCell = &cellArray[x][y];
+			if (currCell->energy&&(currCell->generation > 2)) {
+				fprintf(d,"ID: %lu, parent ID: %lu, lineage: %lu, generation: %lu\n",
+					(uint64_t)currCell->ID,
+					(uint64_t)currCell->parentID,
+					(uint64_t)currCell->lineage,
+					(uint64_t)currCell->generation);
+				wordPtr = 0;
+				shiftPtr = 0;
+				stopCount = 0;
+				for(i=0;i<MAX_NUM_INSTR;++i) {
+					inst = (currCell->genome[wordPtr] >> shiftPtr) & 0xf;
+					/* Four STOP instructions in a row is considered the end.
+					* The probability of this being wrong is *very* small, and
+					* could only occur if you had four STOPs in a row inside
+					* a LOOP/REP pair that's always false. In any case, this
+					* would always result in our *underestimating* the size of
+					* the genome and would never result in an overestimation. */
+					fprintf(d,"%lx",inst);
+					if (inst == 0xf) { /* STOP */
+						if (++stopCount >= 4)
+							break;
+					} else 
+						stopCount = 0;
+					if ((shiftPtr += 4) >= BITS_IN_WORD) {
+						if (++wordPtr >= MAX_WORDS_GENOME) {
+							wordPtr = 0;
+							shiftPtr = 4;
+						} else 
+							shiftPtr = 0;
+					}
+				}
+				fwrite("\n",1,1,d);
+			}
+		}
+	}
+	fclose(d);
+}
+
+
 /**
  * Reports the genome of a cell to a file.
  */
@@ -935,10 +998,10 @@ int main(int argc,char **argv)
 
  
 #ifdef STOP_AT
-		//if (time(NULL) - start_time >= STOP_AT) {		/* Stop at STOP_AT seconds if defined */
-		//	fprintf(stderr,"[QUIT] STOP_AT value of %d seconds reached\n", STOP_AT);
-		//	break;
-		//}
+		if (clock >= STOP_AT) {		/* Stop at STOP_AT seconds if defined */
+			fprintf(stderr,"[QUIT] STOP_AT value of %d seconds reached\n", STOP_AT);
+			break;
+		}
 #endif /* STOP_AT */
 
 		/* Increment clock and run updates periodically */
@@ -978,6 +1041,14 @@ int main(int argc,char **argv)
 		if (!(clock % REPORT_FREQUENCY))
 			doReport(clock);
 #endif /* REPORT_FREQUENCY */
+
+#ifdef CYCLE_REPORT_FREQUENCY
+		/* Periodically report the viable population if defined */
+		if (!(clock % CYCLE_REPORT_FREQUENCY))
+			doCycleReport(clock);
+#endif /* REPORT_FREQUENCY */
+
+        
 
 		/* Introduce a random cell somewhere with a given energy level */
 		/* This is called seeding, and introduces both energy and
