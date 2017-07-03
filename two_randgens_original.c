@@ -362,11 +362,11 @@
 #define MATRIX_A 0x9908b0dfUL   /* constant vector a */
 #define UPPER_MASK 0x80000000UL /* most significant w-r bits */
 #define LOWER_MASK 0x7fffffffUL /* least significant r bits */
+#define CONST_NUM_THREADS 50
 
 static unsigned long cellPick[N]; /* the array for the state vector  */
-//static unsigned long mt1[N]; /* the array for the state vector  */
 static int mti=N+1; /* mti==N+1 means mt[N] is not initialized */
-//static int mti1=N+1; /* mti==N+1 means mt[N] is not initialized */
+static unsigned long rngArray[CONST_NUM_THREADS + 1][N];	// 1 array for every cell execution thread, and the cell picker thread
 
 struct randomGenerator {
 	unsigned long numArray[N];
@@ -392,6 +392,28 @@ static void init_genrand(struct randomGenerator *rgStruct, unsigned long s)
         mt[mti] &= 0xffffffffUL;
         /* for >32 bit machines */
     }
+}
+
+/* initializes arrays in rngArray  with a seed */
+static void init_genrandArray(unsigned long s)
+{
+	int i = 0;
+	for (i = 0; i < CONST_NUM_THREADS; i++) {
+		unsigned long *mt = rngArray[i];
+
+		mt[0]= (s + i) & 0xffffffffUL;	// s + i means that each array gets its own seed
+		
+		// rn uses global mti variable as index!!
+		for (mti=1; mti<N; mti++) {
+			mt[mti] = (1812433253UL * (mt[mti-1] ^ (mt[mti-1] >> 30)) + mti); 
+        		/* See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier. */
+        		/* In the previous versions, MSBs of the seed affect   */
+        		/* only MSBs of the array mt[].                        */
+        		/* 2002/01/09 modified by Makoto Matsumoto             */
+        		mt[mti] &= 0xffffffffUL;
+        		/* for >32 bit machines */
+    		}
+	}
 }
 
 /* generates a random number on [0,0xffffffff]-interval */
@@ -893,6 +915,8 @@ int main(int argc,char **argv)
 	init_genrand(&cellPickStruct, 1234567890);
 	for(i=0;i<1024;++i)
 		getRandom(&cellPickStruct);
+
+	init_genrandArray(1234567890);
 
 	gettimeofday(&fcnStop, NULL);
 	// print out times before and after function, and then the difference
