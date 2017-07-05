@@ -370,7 +370,7 @@ static int mti=N+1; /* mti==N+1 means mt[N] is not initialized */
 // array of RNG arrays, one for each thread, including cell picker thread
 static unsigned long rngArray[NUM_THREADS][N];
 // array of RNG indices, one for each array in rngArray
-static int rngIndexArray[NUM_THREADS] = {N + 1};
+static int rngIndexArray[NUM_THREADS];
 
 /* initializes mt[N] with a seed */
 static void init_genrand(unsigned long s)
@@ -390,19 +390,34 @@ static void init_genrand(unsigned long s)
 /* initializes mt arrays in rngArray with a seed */
 static void init_genrandArray(unsigned long s)
 {
+//	printf("index 0 of rngIndex array: %lu\n", rngIndexArray[0]);
+
 	int i, j;
+	// setting values in each array, reusing j to keep track of which index is being processed
 	for (i = 0; i < NUM_THREADS; i++) {
 		rngArray[i][0] = s & 0xffffffffUL;
 		for (j = 1; j < N; j++) {
-			rngArray[i][mti] = (1812433253UL * (rngArray[i][mti-1] ^ (rngArray[i][mti-1] >> 30)) + mti);
+			rngArray[i][j] = (1812433253UL * (rngArray[i][j-1] ^ (rngArray[i][j-1] >> 30)) + j);
           		/* See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier. */
          		/* In the previous versions, MSBs of the seed affect   */
           		/* only MSBs of the array mt[].                        */
           		/* 2002/01/09 modified by Makoto Matsumoto             */
-          		rngArray[i][mti] &= 0xffffffffUL;
+          		rngArray[i][j] &= 0xffffffffUL;
           		/* for >32 bit machines */	
 		}		
-	}    
+	}   
+
+	// setting mti values in array of indices
+	for (j = 0; j < NUM_THREADS; j++) {
+		rngIndexArray[j] = N;
+	}
+
+	//testing printfs
+	printf("mt[5]: %lu rngArray[0][5]: %lu\n", mt[5], rngArray[0][5]);
+	//printf("mti[5]: %lu rngIndexArray[0][5]: %lu\n", mti[5], rngIndexArray[5]);
+
+	// don't want to deal with printfs. Here just for now.
+	//exit(0); 
 }
 
 /* generates a random number on [0,0xffffffff]-interval */
@@ -959,16 +974,24 @@ int main(int argc,char **argv)
 	/* Buffer used for execution output of candidate offspring */
 	uintptr_t outputBuf[MAX_WORDS_GENOME];
 
+
+
+
         // Measure how long it takes to init the RNG
 	struct timeval fcnStart, fcnStop;
         gettimeofday(&fcnStart, NULL); 
 	/* Seed and init the random number generator */
 	init_genrand(1234567890);
-	for(i=0;i<1024;++i)
-		getRandom();
+	
+	//for(i=0;i<1024;++i)	// comment this out for now to see if mt arrays match up 
+	//	getRandom();
 	gettimeofday(&fcnStop, NULL);
         // print out times before and after function, and then the difference
         printf("1st time: %lf 2nd time: %lf difference: %lf \n", (float) fcnStart.tv_sec, (float) fcnStop.tv_sec, (fcnStop.tv_sec - fcnStart.tv_sec) + (fcnStop.tv_usec - fcnStart.tv_usec)/1000000.0);	
+
+
+	// init array rngs
+	init_genrandArray(1234567890);
 
 
     /* Reset per-update stat counters */
