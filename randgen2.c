@@ -935,12 +935,19 @@ int main(int argc,char **argv)
   
 	/* Buffer used for execution output of candidate offspring */
 	uintptr_t outputBuf[MAX_WORDS_GENOME];
-  
+
+        // Measure how long it takes to init the RNG
+	struct timeval fcnStart, fcnStop;
+        gettimeofday(&fcnStart, NULL); 
 	/* Seed and init the random number generator */
 	init_genrand(1234567890);
 	for(i=0;i<1024;++i)
 		getRandom();
-	
+	gettimeofday(&fcnStop, NULL);
+        // print out times before and after function, and then the difference
+        printf("1st time: %lf 2nd time: %lf difference: %lf \n", (float) fcnStart.tv_sec, (float) fcnStop.tv_sec, (fcnStop.tv_sec - fcnStart.tv_sec) + (fcnStop.tv_usec - fcnStart.tv_usec)/1000000.0);	
+
+
     /* Reset per-update stat counters */
 	for(x=0;x<sizeof(statCounters);++x)
 		((uint8_t *)&statCounters)[x] = (uint8_t)0;
