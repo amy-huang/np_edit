@@ -548,6 +548,22 @@ static inline uintptr_t getRandom()
 }
 
 /**
+ * Get a random number - for 64 bit machines; shifts and adds 2 32 bit numbers
+ *
+ * @return Random number
+ */
+static inline uintptr_t getRandomFromArray(int whichRNG)
+{
+	/* A good optimizing compiler should optimize out this if */
+	/* This is to make it work on 64-bit boxes */
+	if (sizeof(uintptr_t) == 8)
+		return (uintptr_t)((((uint64_t)genrand_int32Array(whichRNG)) << 32) ^ ((uint64_t)genrand_int32Array(whichRNG)));
+	// For regular 32 bit boxes
+    else 
+		return (uintptr_t)genrand_int32Array(whichRNG);
+}
+
+/**
  * Structure for keeping some running tally type statistics
  */
 struct PerUpdateStatCounters
@@ -1009,6 +1025,8 @@ int main(int argc,char **argv)
 	uintptr_t outputBuf[MAX_WORDS_GENOME];
 
 
+	// init array rngs
+	init_genrandArray(1234567890);
 
 
         // Measure how long it takes to init the RNG
@@ -1017,18 +1035,18 @@ int main(int argc,char **argv)
 	/* Seed and init the random number generator */
 	init_genrand(1234567890);
 	
-	//for(i=0;i<1024;++i)	// comment this out for now to see if mt arrays match up 
-	//	getRandom();
+	for(i=0;i<1024;++i) {// init both methods of RNGs	
+		getRandom();
+		getRandomFromArray(4);
+	}
 	gettimeofday(&fcnStop, NULL);
         // print out times before and after function, and then the difference
         printf("1st time: %lf 2nd time: %lf difference: %lf \n", (float) fcnStart.tv_sec, (float) fcnStop.tv_sec, (fcnStop.tv_sec - fcnStart.tv_sec) + (fcnStop.tv_usec - fcnStart.tv_usec)/1000000.0);	
 
 
-	// init array rngs
-	init_genrandArray(1234567890);
 	
 	// compare both methods' 32int randoms
-	printf("original genrand_int32 output: %lu new output: %lu\n", genrand_int32(), genrand_int32Array(0));
+	printf("original genrand_int32 output: %lu new output: %lu\n", genrand_int32(), genrand_int32Array(4));
 
 
     /* Reset per-update stat counters */
