@@ -363,9 +363,14 @@
 #define MATRIX_A 0x9908b0dfUL   /* constant vector a */
 #define UPPER_MASK 0x80000000UL /* most significant w-r bits */
 #define LOWER_MASK 0x7fffffffUL /* least significant r bits */
+#define NUM_THREADS 10
 
 static unsigned long mt[N]; /* the array for the state vector  */
 static int mti=N+1; /* mti==N+1 means mt[N] is not initialized */
+// array of RNG arrays, one for each thread, including cell picker thread
+static unsigned long rngArray[NUM_THREADS][N];
+// array of RNG indices, one for each array in rngArray
+static int rngIndexArray[NUM_THREADS] = {N + 1};
 
 /* initializes mt[N] with a seed */
 static void init_genrand(unsigned long s)
@@ -380,6 +385,24 @@ static void init_genrand(unsigned long s)
         mt[mti] &= 0xffffffffUL;
         /* for >32 bit machines */
     }
+}
+
+/* initializes mt arrays in rngArray with a seed */
+static void init_genrandArray(unsigned long s)
+{
+	int i, j;
+	for (i = 0; i < NUM_THREADS; i++) {
+		rngArray[i][0] = s & 0xffffffffUL;
+		for (j = 1; j < N; j++) {
+			rngArray[i][mti] = (1812433253UL * (rngArray[i][mti-1] ^ (rngArray[i][mti-1] >> 30)) + mti);
+          		/* See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier. */
+         		/* In the previous versions, MSBs of the seed affect   */
+          		/* only MSBs of the array mt[].                        */
+          		/* 2002/01/09 modified by Makoto Matsumoto             */
+          		rngArray[i][mti] &= 0xffffffffUL;
+          		/* for >32 bit machines */	
+		}		
+	}    
 }
 
 /* generates a random number on [0,0xffffffff]-interval */
