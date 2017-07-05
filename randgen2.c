@@ -454,6 +454,40 @@ static inline uint32_t genrand_int32() {
 	return y;
 }
 
+/* generates a random number on [0,0xffffffff]-interval */
+static inline uint32_t genrand_int32Array(int whichRNG) {
+	uint32_t y;
+	static uint32_t mag01[2]={0x0UL, MATRIX_A};
+	/* mag01[x] = x * MATRIX_A  for x=0,1 */
+
+	if (rngIndexArray[whichRNG] >= N) { /* generate N words at one time */
+		int kk;
+
+		for (kk=0;kk<N-M;kk++) {
+			y = (rngArray[whichRNG][kk]&UPPER_MASK)|(rngArray[whichRNG][kk+1]&LOWER_MASK);
+			rngArray[whichRNG][kk] = rngArray[whichRNG][kk+M] ^ (y >> 1) ^ mag01[y & 0x1UL];
+		}
+		for (;kk<N-1;kk++) {
+			y = (rngArray[whichRNG][kk]&UPPER_MASK)|(rngArray[whichRNG][kk+1]&LOWER_MASK);
+			rngArray[whichRNG][kk] = rngArray[whichRNG][kk+(M-N)] ^ (y >> 1) ^ mag01[y & 0x1UL];
+		}
+		y = (rngArray[whichRNG][N-1]&UPPER_MASK)|(rngArray[whichRNG][0]&LOWER_MASK);
+		rngArray[whichRNG][N-1] = rngArray[whichRNG][M-1] ^ (y >> 1) ^ mag01[y & 0x1UL];
+
+		rngIndexArray[whichRNG] = 0;
+	}
+  
+	y = rngArray[whichRNG][rngIndexArray[whichRNG]++];
+
+	/* Tempering */
+	y ^= (y >> 11);
+	y ^= (y << 7) & 0x9d2c5680UL;
+	y ^= (y << 15) & 0xefc60000UL;
+	y ^= (y >> 18);
+
+	return y;
+}
+
 /* ----------------------------------------------------------------------- */
 
 /* Pond depth in machine-size words.  This is calculated from
@@ -992,6 +1026,9 @@ int main(int argc,char **argv)
 
 	// init array rngs
 	init_genrandArray(1234567890);
+	
+	// compare both methods' 32int randoms
+	printf("original genrand_int32 output: %lu new output: %lu\n", genrand_int32(), genrand_int32Array(0));
 
 
     /* Reset per-update stat counters */
