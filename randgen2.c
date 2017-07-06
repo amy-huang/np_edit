@@ -547,12 +547,15 @@ static inline uintptr_t getRandom()
 		return (uintptr_t)genrand_int32();
 }
 
-static inline uintptr_t getRandom2()	// to test if consolidating getRandom and genrand_int32 causes probs
+static inline uintptr_t getRandom2(int whichRNG)	// to test if consolidating getRandom and genrand_int32 causes probs
 {
-
-	uint32_t y;
+        uint32_t y;
+	    uint32_t randArray[3];
+        int i = 0;
         static uint32_t mag01[2]={0x0UL, MATRIX_A};
         // mag01[x] = x * MATRIX_A  for x=0,1 
+
+        for (i = 0; i < 3; i++) {
 
         if (rngIndexArray[whichRNG] >= N) { // generate N words at one time 
                 int kk;
@@ -571,6 +574,8 @@ static inline uintptr_t getRandom2()	// to test if consolidating getRandom and g
                 rngIndexArray[whichRNG] = 0;
         }
 
+        //y = rngArray[whichRNG][rngIndexArray[whichRNG]];
+        //rngIndexArray[whichRNG] += 1;
         y = rngArray[whichRNG][rngIndexArray[whichRNG]++];
 
         // Tempering 
@@ -579,21 +584,25 @@ static inline uintptr_t getRandom2()	// to test if consolidating getRandom and g
         y ^= (y << 15) & 0xefc60000UL;
         y ^= (y >> 18);
 
+        randArray[i] = y;
+        
+        }
+
+	// A good optimizing compiler should optimize out this if 
+	// This is to make it work on 64-bit boxes 
+	//if (sizeof(uintptr_t) == 8)
+	//	return (uintptr_t)((((uint64_t)y) << 32) ^ ((uint64_t)y));
+	// For regular 32 bit boxes
+    //else 
+	//	return (uintptr_t)y;
+
 	// A good optimizing compiler should optimize out this if 
 	// This is to make it work on 64-bit boxes 
 	if (sizeof(uintptr_t) == 8)
-		return (uintptr_t)((((uint64_t)y) << 32) ^ ((uint64_t)y));
+		return (uintptr_t)((((uint64_t)randArray[0]) << 32) ^ ((uint64_t)randArray[1]));
 	// For regular 32 bit boxes
     else 
-		return (uintptr_t)y;
-
-	/* A good optimizing compiler should optimize out this if */
-	/* This is to make it work on 64-bit boxes */
-//	if (sizeof(uintptr_t) == 8)
-//		return (uintptr_t)((((uint64_t)genrand_int32()) << 32) ^ ((uint64_t)genrand_int32()));
-	// For regular 32 bit boxes
-  //  else 
-//		return (uintptr_t)genrand_int32();
+		return (uintptr_t)randArray[2];
 }
 
 /**
@@ -1124,8 +1133,9 @@ int main(int argc,char **argv)
 	init_genrand(1234567890);
 	
 	for(i=0;i<1024;++i) {// init both methods of RNGs	
-	//	getRandom();
-	//	getRandomFromArray(4);
+	    getRandom();
+	    getRandomFromArray(1);
+        getRandom2(4);
 	}
 	gettimeofday(&fcnStop, NULL);
         // print out times before and after function, and then the difference
@@ -1134,13 +1144,11 @@ int main(int argc,char **argv)
 
 	
 	// compare both methods' 32int randoms
-	printf("original genrand_int32 output: %lu new output: %lu\n", genrand_int32(), genrand_int32Array(4));
+	//printf("\noriginal genrand_int32 output: %lu new output: %lu\n", genrand_int32(), genrand_int32Array(4));
 	// compare 1st method's getRandom fcn outputs with separate RNG and non separate
-	printf("new: %lu old: %lu\n", getRandom2(), getRandom());
-	// compare 1st method's getRandom fcn outputs with separate RNG and non separate
-	printf("original getRandom output: %lu new getRandom2 output: %lu\n", getRandom(), getRandom2());
-	// compare both methods' getRandom fcn outputs
-	//printf("original getRandom output: %lu new output: %lu\n", getRandom(), getRandom(4));
+	printf("original getRandom output: %lu new getRandom2 output: %lu getRandomFromArray: %lu \n", getRandom(), getRandom2(4), getRandomFromArray(1));
+	printf("original getRandom output: %lu new getRandom2 output: %lu getRandomFromArray: %lu \n", getRandom(), getRandom2(4), getRandomFromArray(1));
+	printf("original getRandom output: %lu new getRandom2 output: %lu getRandomFromArray: %lu \n", getRandom(), getRandom2(4), getRandomFromArray(1));
 
     /* Reset per-update stat counters */
 	for(x=0;x<sizeof(statCounters);++x)
