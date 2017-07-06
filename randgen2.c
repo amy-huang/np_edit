@@ -546,7 +546,7 @@ static inline uintptr_t getRandom()
     else 
 		return (uintptr_t)genrand_int32();
 }
-
+/*
 static inline uintptr_t getRandom2(int whichRNG)	// to test if consolidating getRandom and genrand_int32 causes probs
 {
         uint32_t y;
@@ -604,7 +604,7 @@ static inline uintptr_t getRandom2(int whichRNG)	// to test if consolidating get
     else 
 		return (uintptr_t)randArray[2];
 }
-
+*/
 /**
  * Get a random number - for 64 bit machines; shifts and adds 2 32 bit numbers
  *
@@ -612,51 +612,13 @@ static inline uintptr_t getRandom2(int whichRNG)	// to test if consolidating get
  */
 static inline uintptr_t getRandomFromArray(int whichRNG)
 {
-/*
-	uint32_t y;
-        static uint32_t mag01[2]={0x0UL, MATRIX_A};
-        // mag01[x] = x * MATRIX_A  for x=0,1 
-
-        if (rngIndexArray[whichRNG] >= N) { // generate N words at one time 
-                int kk;
-
-                for (kk=0;kk<N-M;kk++) {
-                        y = (rngArray[whichRNG][kk]&UPPER_MASK)|(rngArray[whichRNG][kk+1]&LOWER_MASK);
-                        rngArray[whichRNG][kk] = rngArray[whichRNG][kk+M] ^ (y >> 1) ^ mag01[y & 0x1UL];
-                }
-                for (;kk<N-1;kk++) {
-                        y = (rngArray[whichRNG][kk]&UPPER_MASK)|(rngArray[whichRNG][kk+1]&LOWER_MASK);
-                        rngArray[whichRNG][kk] = rngArray[whichRNG][kk+(M-N)] ^ (y >> 1) ^ mag01[y & 0x1UL];
-                }
-                y = (rngArray[whichRNG][N-1]&UPPER_MASK)|(rngArray[whichRNG][0]&LOWER_MASK);
-                rngArray[whichRNG][N-1] = rngArray[whichRNG][M-1] ^ (y >> 1) ^ mag01[y & 0x1UL];
-
-                rngIndexArray[whichRNG] = 0;
-        }
-
-        y = rngArray[whichRNG][rngIndexArray[whichRNG]++];
-
-        // Tempering 
-        y ^= (y >> 11);
-        y ^= (y << 7) & 0x9d2c5680UL;
-        y ^= (y << 15) & 0xefc60000UL;
-        y ^= (y >> 18);
-
-	// A good optimizing compiler should optimize out this if 
-	// This is to make it work on 64-bit boxes 
-	if (sizeof(uintptr_t) == 8)
-		return (uintptr_t)((((uint64_t)y) << 32) ^ ((uint64_t)y));
-	// For regular 32 bit boxes
-    else 
-		return (uintptr_t)y;
-*/
 
 	/* A good optimizing compiler should optimize out this if */
 	/* This is to make it work on 64-bit boxes */
 	if (sizeof(uintptr_t) == 8)
 		return (uintptr_t)((((uint64_t)genrand_int32Array(whichRNG)) << 32) ^ ((uint64_t)genrand_int32Array(whichRNG)));
 	// For regular 32 bit boxes
-    //else 
+    	else 
 		return (uintptr_t)genrand_int32Array(whichRNG);
 }
 
@@ -932,9 +894,11 @@ static inline int accessAllowed(struct Cell *const c2,const uintptr_t c1guess,in
 	* and more probable if they are different in sense 1. Sense 0 is used for
 	* "negative" interactions and sense 1 for "positive" ones. */
 	return sense 
-		? (((getRandom() & 0xf) >= 
+		//? (((getRandom() & 0xf) >= 
+		? (((getRandomFromArray(1) & 0xf) >= 
 			BITS_IN_FOURBIT_WORD[(c2->genome[0] & 0xf) ^ (c1guess & 0xf)])||(!c2->parentID)) 
-		: (((getRandom() & 0xf) <= 
+		//: (((getRandom() & 0xf) <= 
+		: (((getRandomFromArray(1) & 0xf) <= 
 			BITS_IN_FOURBIT_WORD[(c2->genome[0] & 0xf) ^ (c1guess & 0xf)])||(!c2->parentID));
 }
 
@@ -1122,33 +1086,44 @@ int main(int argc,char **argv)
 	uintptr_t outputBuf[MAX_WORDS_GENOME];
 
 
-	// init array rngs
-	init_genrandArray(1234567890);
 
 
-        // Measure how long it takes to init the RNG
+        // Measure how long it takes to init the original RNG
 	struct timeval fcnStart, fcnStop;
         gettimeofday(&fcnStart, NULL); 
+	
 	/* Seed and init the random number generator */
 	init_genrand(1234567890);
-	
 	for(i=0;i<1024;++i) {// init both methods of RNGs	
 	    getRandom();
-	    getRandomFromArray(1);
-        getRandom2(4);
 	}
+
 	gettimeofday(&fcnStop, NULL);
+
         // print out times before and after function, and then the difference
-        printf("1st time: %lf 2nd time: %lf difference: %lf \n", (float) fcnStart.tv_sec, (float) fcnStop.tv_sec, (fcnStop.tv_sec - fcnStart.tv_sec) + (fcnStop.tv_usec - fcnStart.tv_usec)/1000000.0);	
+        printf("original rng 1st time: %lf 2nd time: %lf difference: %lf \n", (float) fcnStart.tv_sec, (float) fcnStop.tv_sec, (fcnStop.tv_sec - fcnStart.tv_sec) + (fcnStop.tv_usec - fcnStart.tv_usec)/1000000.0);	
 
 
+	// DO AGAIN FOR ARRAY RNGs
+        gettimeofday(&fcnStart, NULL); 
+	
+	// init array rngs
+	init_genrandArray(1234567890);
+	for(i=0;i<1024;++i) {// init both methods of RNGs	
+	    getRandomFromArray(1);
+	}
+
+	gettimeofday(&fcnStop, NULL);
+
+        // print out times before and after function, and then the difference
+        printf("array rng 1st time: %lf 2nd time: %lf difference: %lf \n", (float) fcnStart.tv_sec, (float) fcnStop.tv_sec, (fcnStop.tv_sec - fcnStart.tv_sec) + (fcnStop.tv_usec - fcnStart.tv_usec)/1000000.0);	
 	
 	// compare both methods' 32int randoms
 	//printf("\noriginal genrand_int32 output: %lu new output: %lu\n", genrand_int32(), genrand_int32Array(4));
 	// compare 1st method's getRandom fcn outputs with separate RNG and non separate
-	printf("original getRandom output: %lu new getRandom2 output: %lu getRandomFromArray: %lu \n", getRandom(), getRandom2(4), getRandomFromArray(1));
-	printf("original getRandom output: %lu new getRandom2 output: %lu getRandomFromArray: %lu \n", getRandom(), getRandom2(4), getRandomFromArray(1));
-	printf("original getRandom output: %lu new getRandom2 output: %lu getRandomFromArray: %lu \n", getRandom(), getRandom2(4), getRandomFromArray(1));
+	//printf("original getRandom output: %lu new getRandom2 output: %lu getRandomFromArray: %lu \n", getRandom(), getRandom2(4), getRandomFromArray(1));
+	//same comparison print without getRandom2
+	//printf("original getRandom output: %lu getRandomFromArray: %lu \n", getRandom(), getRandomFromArray(1));
 
     /* Reset per-update stat counters */
 	for(x=0;x<sizeof(statCounters);++x)
@@ -1264,20 +1239,24 @@ int main(int argc,char **argv)
 		* entropy into the substrate. This happens every INFLOW_FREQUENCY
 		* clock ticks. */
 		if (!(clock % INFLOW_FREQUENCY)) {
-			x = getRandom() % POND_SIZE_X;
-			y = getRandom() % POND_SIZE_Y;
+			//x = getRandom() % POND_SIZE_X;
+			//y = getRandom() % POND_SIZE_Y;
+			x = getRandomFromArray(1) % POND_SIZE_X;
+			y = getRandomFromArray(1) % POND_SIZE_Y;
 			currCell = &cellArray[x][y];
 			currCell->ID = cellIdCounter;
 			currCell->parentID = 0;
 			currCell->lineage = cellIdCounter;
 			currCell->generation = 0;
 #ifdef INFLOW_RATE_VARIATION
-			currCell->energy += INFLOW_RATE_BASE + (getRandom() % INFLOW_RATE_VARIATION);
+			//currCell->energy += INFLOW_RATE_BASE + (getRandom() % INFLOW_RATE_VARIATION);
+			currCell->energy += INFLOW_RATE_BASE + (getRandomFromArray(1) % INFLOW_RATE_VARIATION);
 #else
 			currCell->energy += INFLOW_RATE_BASE;
 #endif /* INFLOW_RATE_VARIATION */
 			for(i=0;i<MAX_WORDS_GENOME;++i) 
-				currCell->genome[i] = getRandom();
+				//currCell->genome[i] = getRandom();
+				currCell->genome[i] = getRandomFromArray(1);
 			++cellIdCounter;
       
       /* Update the random cell on SDL screen if viz is enabled */
@@ -1292,8 +1271,10 @@ int main(int argc,char **argv)
 		}
     
 		/* Pick a random cell to execute */
-		x = getRandom() % POND_SIZE_X;
-		y = getRandom() % POND_SIZE_Y;
+		//x = getRandom() % POND_SIZE_X;
+		//y = getRandom() % POND_SIZE_Y;
+		x = getRandomFromArray(1) % POND_SIZE_X;
+		y = getRandomFromArray(1) % POND_SIZE_Y;
 		currCell = &cellArray[x][y];
 
 		/* Reset the state of the VM prior to execution */
@@ -1331,8 +1312,10 @@ int main(int argc,char **argv)
 			* it can have all manner of different effects on the end result of
 			* replication: insertions, deletions, duplications of entire
 			* ranges of the genome, etc. */
-			if ((getRandom() & 0xffffffff) < MUTATION_RATE) {
-				tmp = getRandom(); /* Call getRandom() only once for speed */
+			//if ((getRandom() & 0xffffffff) < MUTATION_RATE) {
+			if ((getRandomFromArray(1) & 0xffffffff) < MUTATION_RATE) {
+				//tmp = getRandom(); /* Call getRandom() only once for speed */
+				tmp = getRandomFromArray(1); /* Call getRandom() only once for speed */
 				if (tmp & 0x80) /* Check for the 8th bit to get random boolean */
 					inst = tmp & 0xf; /* Only the first four bits are used here */
 				else 
