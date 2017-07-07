@@ -1068,7 +1068,7 @@ static void timeHandler(struct itimerval tval) {
  */
 int main(int argc,char **argv)
 {
-	uintptr_t i,x,y;
+	uintptr_t i,j,x,y;
     
 
 
@@ -1110,7 +1110,9 @@ int main(int argc,char **argv)
 	// init array rngs
 	init_genrandArray(1234567890);
 	for(i=0;i<1024;++i) {// init both methods of RNGs	
-	    getRandomFromArray(1);
+		for (j = 0; j < NUM_THREADS; j++) {
+			getRandomFromArray(j);
+		}
 	}
 
 	gettimeofday(&fcnStop, NULL);
