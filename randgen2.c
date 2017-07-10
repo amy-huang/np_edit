@@ -363,14 +363,14 @@
 #define MATRIX_A 0x9908b0dfUL   /* constant vector a */
 #define UPPER_MASK 0x80000000UL /* most significant w-r bits */
 #define LOWER_MASK 0x7fffffffUL /* least significant r bits */
-#define NUM_THREADS 10
+#define NUM_THREADS 8 // must be a power of 2 for bit masking in picking RNGs!
 
 static unsigned long mt[N]; /* the array for the state vector  */
 static int mti=N+1; /* mti==N+1 means mt[N] is not initialized */
 // array of RNG arrays, one for each thread, including cell picker thread
 static unsigned long rngArray[NUM_THREADS][N];
 // array of RNG indices, one for each array in rngArray
-static int rngIndexArray[NUM_THREADS];
+static int rngIndexArray[NUM_THREADS + 1];
 
 /* initializes mt[N] with a seed */
 static void init_genrand(unsigned long s)
@@ -720,7 +720,7 @@ static void doReport(const uint64_t clock)
 	uintptr_t x,y,wordPtr,shiftPtr,inst,stopCount,i;
 	struct Cell *currCell;
   
-	sprintf(buf,"%lu.report.csv",clock);
+	sprintf(buf,"r%lu.report.csv",clock);
 	d = fopen(buf,"w");
 	if (!d) {
 		fprintf(stderr,"[WARNING] Could not open %s for writing.\n",buf);
@@ -888,17 +888,17 @@ static inline struct Cell *getNeighbor(const uintptr_t x,const uintptr_t y,const
 /**
  * Determines if c1 is allowed to access c2
  */
-static inline int accessAllowed(struct Cell *const c2,const uintptr_t c1guess,int sense)
+static inline int accessAllowed(struct Cell *const c2,const uintptr_t c1guess,int sense, int currRNG)
 {
 	/* Access permission is more probable if they are more similar in sense 0,
 	* and more probable if they are different in sense 1. Sense 0 is used for
 	* "negative" interactions and sense 1 for "positive" ones. */
 	return sense 
 		//? (((getRandom() & 0xf) >= 
-		? (((getRandomFromArray(1) & 0xf) >= 
+		? (((getRandomFromArray(currRNG) & 0xf) >= 
 			BITS_IN_FOURBIT_WORD[(c2->genome[0] & 0xf) ^ (c1guess & 0xf)])||(!c2->parentID)) 
 		//: (((getRandom() & 0xf) <= 
-		: (((getRandomFromArray(1) & 0xf) <= 
+		: (((getRandomFromArray(currRNG) & 0xf) <= 
 			BITS_IN_FOURBIT_WORD[(c2->genome[0] & 0xf) ^ (c1guess & 0xf)])||(!c2->parentID));
 }
 
@@ -1123,9 +1123,9 @@ int main(int argc,char **argv)
 	// compare both methods' 32int randoms
 	//printf("\noriginal genrand_int32 output: %lu new output: %lu\n", genrand_int32(), genrand_int32Array(4));
 	// compare 1st method's getRandom fcn outputs with separate RNG and non separate
-	//printf("original getRandom output: %lu new getRandom2 output: %lu getRandomFromArray: %lu \n", getRandom(), getRandom2(4), getRandomFromArray(1));
+	//printf("original getRandom output: %lu new getRandom2 output: %lu getRandomFromArray: %lu \n", getRandom(), getRandom2(4), getRandomFromArray(currRNG));
 	//same comparison print without getRandom2
-	//printf("original getRandom output: %lu getRandomFromArray: %lu \n", getRandom(), getRandomFromArray(1));
+	//printf("original getRandom output: %lu getRandomFromArray: %lu \n", getRandom(), getRandomFromArray(currRNG));
 
     /* Reset per-update stat counters */
 	for(x=0;x<sizeof(statCounters);++x)
@@ -1173,6 +1173,7 @@ int main(int argc,char **argv)
    
 	int stop;			/* If this is nonzero, cell execution stops. This allows us
 					* to avoid the ugly use of a goto to exit the loop. :) */
+	int currRNG = 0;
 #ifdef USE_SDL
 	/* Set up SDL if we're using it */
 	Initialize_SDL2();
@@ -1234,7 +1235,8 @@ int main(int argc,char **argv)
 		//	doCycleReport(clock);
 #endif /* REPORT_FREQUENCY */
 
-        
+       		// increment index of RNG to use for this cell
+		currRNG = (++currRNG % NUM_THREADS);	
 
 		/* Introduce a random cell somewhere with a given energy level */
 		/* This is called seeding, and introduces both energy and
@@ -1243,8 +1245,8 @@ int main(int argc,char **argv)
 		if (!(clock % INFLOW_FREQUENCY)) {
 			//x = getRandom() % POND_SIZE_X;
 			//y = getRandom() % POND_SIZE_Y;
-			x = getRandomFromArray(1) % POND_SIZE_X;
-			y = getRandomFromArray(1) % POND_SIZE_Y;
+			x = getRandomFromArray(currRNG) % POND_SIZE_X;
+			y = getRandomFromArray(currRNG) % POND_SIZE_Y;
 			currCell = &cellArray[x][y];
 			currCell->ID = cellIdCounter;
 			currCell->parentID = 0;
@@ -1252,13 +1254,13 @@ int main(int argc,char **argv)
 			currCell->generation = 0;
 #ifdef INFLOW_RATE_VARIATION
 			//currCell->energy += INFLOW_RATE_BASE + (getRandom() % INFLOW_RATE_VARIATION);
-			currCell->energy += INFLOW_RATE_BASE + (getRandomFromArray(1) % INFLOW_RATE_VARIATION);
+			currCell->energy += INFLOW_RATE_BASE + (getRandomFromArray(currRNG) % INFLOW_RATE_VARIATION);
 #else
 			currCell->energy += INFLOW_RATE_BASE;
 #endif /* INFLOW_RATE_VARIATION */
 			for(i=0;i<MAX_WORDS_GENOME;++i) 
 				//currCell->genome[i] = getRandom();
-				currCell->genome[i] = getRandomFromArray(1);
+				currCell->genome[i] = getRandomFromArray(currRNG);
 			++cellIdCounter;
       
       /* Update the random cell on SDL screen if viz is enabled */
@@ -1275,9 +1277,16 @@ int main(int argc,char **argv)
 		/* Pick a random cell to execute */
 		//x = getRandom() % POND_SIZE_X;
 		//y = getRandom() % POND_SIZE_Y;
-		x = getRandomFromArray(1) % POND_SIZE_X;
-		y = getRandomFromArray(1) % POND_SIZE_Y;
+		x = getRandomFromArray(currRNG) % POND_SIZE_X;
+		y = getRandomFromArray(currRNG) % POND_SIZE_Y;
 		currCell = &cellArray[x][y];
+		
+		//uint64_t rngMask = (uint64_t) NUM_THREADS - 1;
+		//printf("rngMask is : %lx\n", rngMask);
+		//printf("masked currRNG is %lx\n", currCell->ID & rngMask);
+		//int currRNG = (currCell->ID & 0x7) + 1;	
+		//printf("hard coded masked currRNG is %lx\n", currRNG);
+		//printf("currRNG is %d\n", currRNG);
 
 		/* Reset the state of the VM prior to execution */
 		for(i=0;i<MAX_WORDS_GENOME;++i)
@@ -1315,9 +1324,10 @@ int main(int argc,char **argv)
 			* replication: insertions, deletions, duplications of entire
 			* ranges of the genome, etc. */
 			//if ((getRandom() & 0xffffffff) < MUTATION_RATE) {
-			if ((getRandomFromArray(1) & 0xffffffff) < MUTATION_RATE) {
+			if ((getRandomFromArray(currRNG) & 0xffffffff) < MUTATION_RATE) {
 				//tmp = getRandom(); /* Call getRandom() only once for speed */
-				tmp = getRandomFromArray(1); /* Call getRandom() only once for speed */
+				tmp = getRandomFromArray(currRNG); /* Call getRandom() only once for speed */
+				//printf("clock cycle: %d currRNG: %d\n", clock, currRNG);
 				if (tmp & 0x80) /* Check for the 8th bit to get random boolean */
 					inst = tmp & 0xf; /* Only the first four bits are used here */
 				else 
@@ -1428,7 +1438,7 @@ int main(int argc,char **argv)
 						break;
 					case 0xd: /* KILL: Blow away neighboring cell if allowed with penalty on failure */
 						neighborCell = getNeighbor(x,y,facing);
-						if (accessAllowed(neighborCell,reg,0)) {
+						if (accessAllowed(neighborCell,reg,0,currRNG)) {
 							if (neighborCell->generation > 2)
 								++statCounters.viableCellsKilled;
 
@@ -1452,7 +1462,7 @@ int main(int argc,char **argv)
 						break;
 					case 0xe: /* SHARE: Equalize energy between self and neighbor if allowed */
 						neighborCell = getNeighbor(x,y,facing);
-						if (accessAllowed(neighborCell,reg,1)) {
+						if (accessAllowed(neighborCell,reg,1,currRNG)) {
 							if (neighborCell->generation > 2)
 								++statCounters.viableCellShares;
 
@@ -1486,7 +1496,7 @@ int main(int argc,char **argv)
 		* junk eventually. See the seeding code in the main loop above. */
 		if ((outputBuf[0] & 0xff) != 0xff) {
             neighborCell = getNeighbor(x,y,facing);
-			if ((neighborCell->energy)&&accessAllowed(neighborCell,reg,0)) {
+			if ((neighborCell->energy)&&accessAllowed(neighborCell,reg,0,currRNG)) {
 				/* If replacing a viable cell, update relevant stats for update */
 				if (neighborCell->generation > 2)
 					++statCounters.viableCellsReplaced;
