@@ -1,5 +1,9 @@
-// THIS IS THE ORIGINAL CODE WITH A FEW MORE COMMENTS AND FIXED RANDOM NUMBER
-// GENERATOR SEED. DON'T TOUCH.
+// THIS VERSION USES MULTIPLE RANDOM GENERATORS, BUT IS STILL SERIAL.
+// THE LAST INDEX OF THE ARRAY OF RNG ARRAYS IS USED TO PICK CELLS AND
+// INTRODUCE RANDOM CELLS WITH ENERGY.
+// THE REST ARE FOR EACH INDIVIDUAL CELL EXECUTION, ASSIGNED BY LOCATION.
+// A REPRODUCIBLE RESULT WOULD BE A PARALLEL VERSION THAT BEHAVES THE EXACT
+// SAME AS THIS ALTERED, SERIAL VERSION OF NANOPOND.
 
 /* *********************************************************************** */
 /*                                                                         */
@@ -364,8 +368,8 @@
 #define UPPER_MASK 0x80000000UL /* most significant w-r bits */
 #define LOWER_MASK 0x7fffffffUL /* least significant r bits */
 
-static unsigned long mt[N]; /* the array for the state vector  */
-static int mti=N+1; /* mti==N+1 means mt[N] is not initialized */
+//static unsigned long mt[N]; /* the array for the state vector  */
+//static int mti=N+1; /* mti==N+1 means mt[N] is not initialized */
 // array of RNG arrays, one for each thread, including cell picker thread
 static unsigned long rngArray[POND_SIZE_X * POND_SIZE_Y + 1][N];
 // array of RNG indices, one for each array in rngArray
@@ -1095,9 +1099,9 @@ int main(int argc,char **argv)
         gettimeofday(&fcnStart, NULL); 
 	
 	/* Seed and init the random number generator */
-	init_genrand(1234567890);
+//	init_genrand(1234567890);
 	//for(i=0;i<1024;++i) {// init both methods of RNGs	
-	    getRandom();
+//	    getRandom();
 	//}
 
 	gettimeofday(&fcnStop, NULL);
