@@ -368,8 +368,8 @@
 #define UPPER_MASK 0x80000000UL /* most significant w-r bits */
 #define LOWER_MASK 0x7fffffffUL /* least significant r bits */
 
-//static unsigned long mt[N]; /* the array for the state vector  */
-//static int mti=N+1; /* mti==N+1 means mt[N] is not initialized */
+static unsigned long mt[N]; /* the array for the state vector  */
+static int mti=N+1; /* mti==N+1 means mt[N] is not initialized */
 // array of RNG arrays, one for each thread, including cell picker thread
 static unsigned long rngArray[POND_SIZE_X * POND_SIZE_Y + 1][N];
 // array of RNG indices, one for each array in rngArray
@@ -393,14 +393,12 @@ static void init_genrand(unsigned long s)
 /* initializes mt arrays in rngArray with a seed */
 static void init_genrandArray(unsigned long s)
 {
-//	printf("index 0 of rngIndex array: %lu\n", rngIndexArray[0]);
-
 	int i, j;
 	// setting values in each array, reusing j to keep track of which index is being processed
 	for (i = 0; i < POND_SIZE_X * POND_SIZE_Y + 1; i++) {
-		//rngArray[i][0] = s & 0xffffffffUL;
+		rngArray[i][0] = s & 0xffffffffUL;
 		// Give each array a different seed, adding on its index to the original passed in seed
-		rngArray[i][0] = (s + i) & 0xffffffffUL;
+		//rngArray[i][0] = (s + i) & 0xffffffffUL;
 		for (j = 1; j < N; j++) {
 			rngArray[i][j] = (1812433253UL * (rngArray[i][j-1] ^ (rngArray[i][j-1] >> 30)) + j);
           		/* See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier. */
@@ -417,12 +415,10 @@ static void init_genrandArray(unsigned long s)
 		rngIndexArray[j] = N;
 	}
 
-	//testing printfs
-	printf("mt[5]: %lu rngArray[0][5]: %lu\n", mt[5], rngArray[0][5]);
+	//testing printfs to make sure original array and each of new arrays are same`
+	//printf("mt[5]: %lu rngArray[0][5]: %lu\n", mt[5], rngArray[0][5]);
 	//printf("mti[5]: %lu rngIndexArray[0][5]: %lu\n", mti[5], rngIndexArray[5]);
 
-	// don't want to deal with printfs. Here just for now.
-	//exit(0); 
 }
 
 /* generates a random number on [0,0xffffffff]-interval */
@@ -551,65 +547,7 @@ static inline uintptr_t getRandom()
     else 
 		return (uintptr_t)genrand_int32();
 }
-/*
-static inline uintptr_t getRandom2(int whichRNG)	// to test if consolidating getRandom and genrand_int32 causes probs
-{
-        uint32_t y;
-	    uint32_t randArray[3];
-        int i = 0;
-        static uint32_t mag01[2]={0x0UL, MATRIX_A};
-        // mag01[x] = x * MATRIX_A  for x=0,1 
 
-        for (i = 0; i < 3; i++) {
-
-        if (rngIndexArray[whichRNG] >= N) { // generate N words at one time 
-                int kk;
-
-                for (kk=0;kk<N-M;kk++) {
-                        y = (rngArray[whichRNG][kk]&UPPER_MASK)|(rngArray[whichRNG][kk+1]&LOWER_MASK);
-                        rngArray[whichRNG][kk] = rngArray[whichRNG][kk+M] ^ (y >> 1) ^ mag01[y & 0x1UL];
-                }
-                for (;kk<N-1;kk++) {
-                        y = (rngArray[whichRNG][kk]&UPPER_MASK)|(rngArray[whichRNG][kk+1]&LOWER_MASK);
-                        rngArray[whichRNG][kk] = rngArray[whichRNG][kk+(M-N)] ^ (y >> 1) ^ mag01[y & 0x1UL];
-                }
-                y = (rngArray[whichRNG][N-1]&UPPER_MASK)|(rngArray[whichRNG][0]&LOWER_MASK);
-                rngArray[whichRNG][N-1] = rngArray[whichRNG][M-1] ^ (y >> 1) ^ mag01[y & 0x1UL];
-
-                rngIndexArray[whichRNG] = 0;
-        }
-
-        //y = rngArray[whichRNG][rngIndexArray[whichRNG]];
-        //rngIndexArray[whichRNG] += 1;
-        y = rngArray[whichRNG][rngIndexArray[whichRNG]++];
-
-        // Tempering 
-        y ^= (y >> 11);
-        y ^= (y << 7) & 0x9d2c5680UL;
-        y ^= (y << 15) & 0xefc60000UL;
-        y ^= (y >> 18);
-
-        randArray[i] = y;
-        
-        }
-
-	// A good optimizing compiler should optimize out this if 
-	// This is to make it work on 64-bit boxes 
-	//if (sizeof(uintptr_t) == 8)
-	//	return (uintptr_t)((((uint64_t)y) << 32) ^ ((uint64_t)y));
-	// For regular 32 bit boxes
-    //else 
-	//	return (uintptr_t)y;
-
-	// A good optimizing compiler should optimize out this if 
-	// This is to make it work on 64-bit boxes 
-	if (sizeof(uintptr_t) == 8)
-		return (uintptr_t)((((uint64_t)randArray[0]) << 32) ^ ((uint64_t)randArray[1]));
-	// For regular 32 bit boxes
-    else 
-		return (uintptr_t)randArray[2];
-}
-*/
 /**
  * Get a random number - for 64 bit machines; shifts and adds 2 32 bit numbers
  *
@@ -618,13 +556,27 @@ static inline uintptr_t getRandom2(int whichRNG)	// to test if consolidating get
 static inline uintptr_t getRandomFromArray(int whichRNG)
 {
 
+	// for testing
+	uintptr_t result;
+
 	/* A good optimizing compiler should optimize out this if */
 	/* This is to make it work on 64-bit boxes */
-	if (sizeof(uintptr_t) == 8)
-		return (uintptr_t)((((uint64_t)genrand_int32Array(whichRNG)) << 32) ^ ((uint64_t)genrand_int32Array(whichRNG)));
+	if (sizeof(uintptr_t) == 8) {
+		//for testing
+		result = (uintptr_t)((((uint64_t)genrand_int32Array(whichRNG)) << 32) ^ ((uint64_t)genrand_int32Array(whichRNG)));
+		printf("rng %d spit out num %d on index %d  with 1st rand num in array %d\n", whichRNG, result, rngIndexArray[whichRNG], rngArray[whichRNG][0]);
+		
+		//return (uintptr_t)((((uint64_t)genrand_int32Array(whichRNG)) << 32) ^ ((uint64_t)genrand_int32Array(whichRNG)));
 	// For regular 32 bit boxes
-    	else 
-		return (uintptr_t)genrand_int32Array(whichRNG);
+	} else { 
+		// for testing
+		result = (uintptr_t)genrand_int32Array(whichRNG);
+		printf("rng %d spit out num %d on index %d  with 1st rand num in array %d\n", whichRNG, result, rngIndexArray[whichRNG], rngArray[whichRNG][0]);
+		
+		//return (uintptr_t)genrand_int32Array(whichRNG);
+	}
+	//for testing
+	return result;
 }
 
 /**
@@ -899,10 +851,8 @@ static inline int accessAllowed(struct Cell *const c2,const uintptr_t c1guess,in
 	* and more probable if they are different in sense 1. Sense 0 is used for
 	* "negative" interactions and sense 1 for "positive" ones. */
 	return sense 
-		//? (((getRandom() & 0xf) >= 
 		? (((getRandomFromArray(currRNG) & 0xf) >= 
 			BITS_IN_FOURBIT_WORD[(c2->genome[0] & 0xf) ^ (c1guess & 0xf)])||(!c2->parentID)) 
-		//: (((getRandom() & 0xf) <= 
 		: (((getRandomFromArray(currRNG) & 0xf) <= 
 			BITS_IN_FOURBIT_WORD[(c2->genome[0] & 0xf) ^ (c1guess & 0xf)])||(!c2->parentID));
 }
@@ -1091,45 +1041,37 @@ int main(int argc,char **argv)
 	uintptr_t outputBuf[MAX_WORDS_GENOME];
 
 /**** BEGIN TEST PRINTFS ****/
+	
+/* Seed and init the original random number generator */
+/*	init_genrand(1234567890);
+	for(i=0;i<1024;++i) {// init both methods of RNGs	
+	    getRandom();
+	}
+*/
 
-
-
-        // Measure how long it takes to init the original RNG
+// Measure how long it takes to seed and init the array of RNG arrays
 	struct timeval fcnStart, fcnStop;
-        gettimeofday(&fcnStart, NULL); 
-	
-	/* Seed and init the random number generator */
-//	init_genrand(1234567890);
-	//for(i=0;i<1024;++i) {// init both methods of RNGs	
-//	    getRandom();
-	//}
+	gettimeofday(&fcnStart, NULL);
 
-	gettimeofday(&fcnStop, NULL);
-
-        // print out times before and after function, and then the difference
-        printf("original rng 1st time: %lf 2nd time: %lf difference: %lf \n", (float) fcnStart.tv_sec, (float) fcnStop.tv_sec, (fcnStop.tv_sec - fcnStart.tv_sec) + (fcnStop.tv_usec - fcnStart.tv_usec)/1000000.0);	
-
-
-	// DO AGAIN FOR ARRAY RNGs
-        gettimeofday(&fcnStart, NULL); 
-	
-	// init array rngs
+	// Seed and init array rngs
 	init_genrandArray(1234567890);
 	//for(i=0;i<1024;++i) {// init both methods of RNGs	
 		for (j = 0; j < POND_SIZE_X * POND_SIZE_Y; j++) {
-			printf("random from array index %d: %d\n",j, getRandomFromArray(j));
+			//printf("random from array index %d: %d\n",j, getRandomFromArray(j));
+			getRandomFromArray(j);
 		}
 	//}
-
+	
 	gettimeofday(&fcnStop, NULL);
 
-        // print out times before and after function, and then the difference
-        printf("array rng 1st time: %lf 2nd time: %lf difference: %lf \n", (float) fcnStart.tv_sec, (float) fcnStop.tv_sec, (fcnStop.tv_sec - fcnStart.tv_sec) + (fcnStop.tv_usec - fcnStart.tv_usec)/1000000.0);	
-	
-	// compare both methods' 32int randoms
-	printf("\noriginal genrand_int32 output: %lu new output: %lu\n", genrand_int32(), genrand_int32Array(4));
+// print out times before and after function, and then the difference
+printf("array rng 1st time: %lf 2nd time: %lf difference: %lf \n", (float) fcnStart.tv_sec, (float) fcnStop.tv_sec, (fcnStop.tv_sec - fcnStart.tv_sec) + (fcnStop.tv_usec - fcnStart.tv_usec)/1000000.0);	
+
+/*  These tests call the random functions, so comment out if all arrays should be on the same index! */
+	// compare original and new methods' 32int randoms
+	//printf("\noriginal genrand_int32 output: %lu new output: %lu\n", genrand_int32(), genrand_int32Array(4));
 	//same comparison print without getRandomFromArray
-	printf("original getRandom output: %lu getRandomFromArray: %lu \n", getRandom(), getRandomFromArray(4));
+	//printf("original getRandom output: %lu getRandomFromArray: %lu \n", getRandom(), getRandomFromArray(4));
 
 	// make sure array RNGs are independent
 	/*
@@ -1138,9 +1080,10 @@ int main(int argc,char **argv)
 	printf("random from array 3: %d\n", getRandomFromArray(3));
 	*/
 	// alternate run to ensure independence
-	printf("random from array 3: %d\n", getRandomFromArray(3));
-	printf("random from array 2: %d\n", getRandomFromArray(2));
-	printf("random from array 1: %d\n", getRandomFromArray(1));
+	//printf("random from array 3: %d\n", getRandomFromArray(3));
+	//printf("random from array 2: %d\n", getRandomFromArray(2));
+	//printf("random from array 1: %d\n", getRandomFromArray(1));
+
 /**** END TEST PRINTFS ****/
     
 
