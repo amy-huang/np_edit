@@ -363,14 +363,15 @@
 #define MATRIX_A 0x9908b0dfUL   /* constant vector a */
 #define UPPER_MASK 0x80000000UL /* most significant w-r bits */
 #define LOWER_MASK 0x7fffffffUL /* least significant r bits */
-#define NUM_THREADS 8 // must be a power of 2 for bit masking in picking RNGs!
+static int numRNGs = POND_SIZE_X * POND_SIZE_Y + 1;
+printf("number that is num rngss : %d", numRNGs);
 
 static unsigned long mt[N]; /* the array for the state vector  */
 static int mti=N+1; /* mti==N+1 means mt[N] is not initialized */
 // array of RNG arrays, one for each thread, including cell picker thread
-static unsigned long rngArray[NUM_THREADS][N];
+static unsigned long rngArray[POND_SIZE_X * POND_SIZE_Y + 1][N];
 // array of RNG indices, one for each array in rngArray
-static int rngIndexArray[NUM_THREADS + 1];
+static int rngIndexArray[POND_SIZE_X * POND_SIZE_Y + 1];
 
 /* initializes mt[N] with a seed */
 static void init_genrand(unsigned long s)
@@ -394,7 +395,7 @@ static void init_genrandArray(unsigned long s)
 
 	int i, j;
 	// setting values in each array, reusing j to keep track of which index is being processed
-	for (i = 0; i < NUM_THREADS; i++) {
+	for (i = 0; i < POND_SIZE_X * POND_SIZE_Y; i++) {
 		rngArray[i][0] = s & 0xffffffffUL;
 		for (j = 1; j < N; j++) {
 			rngArray[i][j] = (1812433253UL * (rngArray[i][j-1] ^ (rngArray[i][j-1] >> 30)) + j);
@@ -408,7 +409,7 @@ static void init_genrandArray(unsigned long s)
 	}   
 
 	// setting mti values in array of indices
-	for (j = 0; j < NUM_THREADS; j++) {
+	for (j = 0; j < POND_SIZE_X * POND_SIZE_Y; j++) {
 		rngIndexArray[j] = N;
 	}
 
@@ -1110,7 +1111,7 @@ int main(int argc,char **argv)
 	// init array rngs
 	init_genrandArray(1234567890);
 	for(i=0;i<1024;++i) {// init both methods of RNGs	
-		for (j = 0; j < NUM_THREADS; j++) {
+		for (j = 0; j < POND_SIZE_X * POND_SIZE_Y; j++) {
 			getRandomFromArray(j);
 		}
 	}
@@ -1236,7 +1237,7 @@ int main(int argc,char **argv)
 #endif /* REPORT_FREQUENCY */
 
        		// increment index of RNG to use for this cell
-		currRNG = (++currRNG % NUM_THREADS);	
+		currRNG = (++currRNG % POND_SIZE_X * POND_SIZE_Y);	
 
 		/* Introduce a random cell somewhere with a given energy level */
 		/* This is called seeding, and introduces both energy and
@@ -1281,7 +1282,7 @@ int main(int argc,char **argv)
 		y = getRandomFromArray(currRNG) % POND_SIZE_Y;
 		currCell = &cellArray[x][y];
 		
-		//uint64_t rngMask = (uint64_t) NUM_THREADS - 1;
+		//uint64_t rngMask = (uint64_t) POND_SIZE_X * POND_SIZE_Y - 1;
 		//printf("rngMask is : %lx\n", rngMask);
 		//printf("masked currRNG is %lx\n", currCell->ID & rngMask);
 		//int currRNG = (currCell->ID & 0x7) + 1;	
