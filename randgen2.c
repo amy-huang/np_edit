@@ -363,8 +363,6 @@
 #define MATRIX_A 0x9908b0dfUL   /* constant vector a */
 #define UPPER_MASK 0x80000000UL /* most significant w-r bits */
 #define LOWER_MASK 0x7fffffffUL /* least significant r bits */
-static int numRNGs = POND_SIZE_X * POND_SIZE_Y + 1;
-printf("number that is num rngss : %d", numRNGs);
 
 static unsigned long mt[N]; /* the array for the state vector  */
 static int mti=N+1; /* mti==N+1 means mt[N] is not initialized */
@@ -1095,9 +1093,9 @@ int main(int argc,char **argv)
 	
 	/* Seed and init the random number generator */
 	init_genrand(1234567890);
-	for(i=0;i<1024;++i) {// init both methods of RNGs	
+	//for(i=0;i<1024;++i) {// init both methods of RNGs	
 	    getRandom();
-	}
+	//}
 
 	gettimeofday(&fcnStop, NULL);
 
@@ -1110,11 +1108,11 @@ int main(int argc,char **argv)
 	
 	// init array rngs
 	init_genrandArray(1234567890);
-	for(i=0;i<1024;++i) {// init both methods of RNGs	
+	//for(i=0;i<1024;++i) {// init both methods of RNGs	
 		for (j = 0; j < POND_SIZE_X * POND_SIZE_Y; j++) {
-			getRandomFromArray(j);
+			printf("random from array: %d\n", getRandomFromArray(j));
 		}
-	}
+	//}
 
 	gettimeofday(&fcnStop, NULL);
 
@@ -1122,11 +1120,9 @@ int main(int argc,char **argv)
         printf("array rng 1st time: %lf 2nd time: %lf difference: %lf \n", (float) fcnStart.tv_sec, (float) fcnStop.tv_sec, (fcnStop.tv_sec - fcnStart.tv_sec) + (fcnStop.tv_usec - fcnStart.tv_usec)/1000000.0);	
 	
 	// compare both methods' 32int randoms
-	//printf("\noriginal genrand_int32 output: %lu new output: %lu\n", genrand_int32(), genrand_int32Array(4));
-	// compare 1st method's getRandom fcn outputs with separate RNG and non separate
-	//printf("original getRandom output: %lu new getRandom2 output: %lu getRandomFromArray: %lu \n", getRandom(), getRandom2(4), getRandomFromArray(currRNG));
-	//same comparison print without getRandom2
-	//printf("original getRandom output: %lu getRandomFromArray: %lu \n", getRandom(), getRandomFromArray(currRNG));
+	printf("\noriginal genrand_int32 output: %lu new output: %lu\n", genrand_int32(), genrand_int32Array(4));
+	//same comparison print without getRandomFromArray
+	printf("original getRandom output: %lu getRandomFromArray: %lu \n", getRandom(), getRandomFromArray(4));
 
     /* Reset per-update stat counters */
 	for(x=0;x<sizeof(statCounters);++x)
