@@ -393,8 +393,10 @@ static void init_genrandArray(unsigned long s)
 
 	int i, j;
 	// setting values in each array, reusing j to keep track of which index is being processed
-	for (i = 0; i < POND_SIZE_X * POND_SIZE_Y; i++) {
-		rngArray[i][0] = s & 0xffffffffUL;
+	for (i = 0; i < POND_SIZE_X * POND_SIZE_Y + 1; i++) {
+		//rngArray[i][0] = s & 0xffffffffUL;
+		// Give each array a different seed, adding on its index to the original passed in seed
+		rngArray[i][0] = (s + i) & 0xffffffffUL;
 		for (j = 1; j < N; j++) {
 			rngArray[i][j] = (1812433253UL * (rngArray[i][j-1] ^ (rngArray[i][j-1] >> 30)) + j);
           		/* See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier. */
@@ -407,7 +409,7 @@ static void init_genrandArray(unsigned long s)
 	}   
 
 	// setting mti values in array of indices
-	for (j = 0; j < POND_SIZE_X * POND_SIZE_Y; j++) {
+	for (j = 0; j < POND_SIZE_X * POND_SIZE_Y + 1; j++) {
 		rngIndexArray[j] = N;
 	}
 
@@ -1084,6 +1086,7 @@ int main(int argc,char **argv)
 	/* Buffer used for execution output of candidate offspring */
 	uintptr_t outputBuf[MAX_WORDS_GENOME];
 
+/**** BEGIN TEST PRINTFS ****/
 
 
 
@@ -1110,7 +1113,7 @@ int main(int argc,char **argv)
 	init_genrandArray(1234567890);
 	//for(i=0;i<1024;++i) {// init both methods of RNGs	
 		for (j = 0; j < POND_SIZE_X * POND_SIZE_Y; j++) {
-			printf("random from array: %d\n", getRandomFromArray(j));
+			printf("random from array index %d: %d\n",j, getRandomFromArray(j));
 		}
 	//}
 
@@ -1124,7 +1127,20 @@ int main(int argc,char **argv)
 	//same comparison print without getRandomFromArray
 	printf("original getRandom output: %lu getRandomFromArray: %lu \n", getRandom(), getRandomFromArray(4));
 
-    /* Reset per-update stat counters */
+	// make sure array RNGs are independent
+	/*
+	printf("random from array 1: %d\n", getRandomFromArray(1));
+	printf("random from array 2: %d\n", getRandomFromArray(2));
+	printf("random from array 3: %d\n", getRandomFromArray(3));
+	*/
+	// alternate run to ensure independence
+	printf("random from array 3: %d\n", getRandomFromArray(3));
+	printf("random from array 2: %d\n", getRandomFromArray(2));
+	printf("random from array 1: %d\n", getRandomFromArray(1));
+/**** END TEST PRINTFS ****/
+    
+
+	/* Reset per-update stat counters */
 	for(x=0;x<sizeof(statCounters);++x)
 		((uint8_t *)&statCounters)[x] = (uint8_t)0;
   
@@ -1232,32 +1248,25 @@ int main(int argc,char **argv)
 		//	doCycleReport(clock);
 #endif /* REPORT_FREQUENCY */
 
-       		// increment index of RNG to use for this cell
-		currRNG = (++currRNG % POND_SIZE_X * POND_SIZE_Y);	
-
 		/* Introduce a random cell somewhere with a given energy level */
 		/* This is called seeding, and introduces both energy and
 		* entropy into the substrate. This happens every INFLOW_FREQUENCY
 		* clock ticks. */
 		if (!(clock % INFLOW_FREQUENCY)) {
-			//x = getRandom() % POND_SIZE_X;
-			//y = getRandom() % POND_SIZE_Y;
-			x = getRandomFromArray(currRNG) % POND_SIZE_X;
-			y = getRandomFromArray(currRNG) % POND_SIZE_Y;
+			x = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % POND_SIZE_X;
+			y = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % POND_SIZE_Y;
 			currCell = &cellArray[x][y];
 			currCell->ID = cellIdCounter;
 			currCell->parentID = 0;
 			currCell->lineage = cellIdCounter;
 			currCell->generation = 0;
 #ifdef INFLOW_RATE_VARIATION
-			//currCell->energy += INFLOW_RATE_BASE + (getRandom() % INFLOW_RATE_VARIATION);
-			currCell->energy += INFLOW_RATE_BASE + (getRandomFromArray(currRNG) % INFLOW_RATE_VARIATION);
+			currCell->energy += INFLOW_RATE_BASE + (getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % INFLOW_RATE_VARIATION);
 #else
 			currCell->energy += INFLOW_RATE_BASE;
 #endif /* INFLOW_RATE_VARIATION */
 			for(i=0;i<MAX_WORDS_GENOME;++i) 
-				//currCell->genome[i] = getRandom();
-				currCell->genome[i] = getRandomFromArray(currRNG);
+				currCell->genome[i] = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y);
 			++cellIdCounter;
       
       /* Update the random cell on SDL screen if viz is enabled */
@@ -1274,16 +1283,11 @@ int main(int argc,char **argv)
 		/* Pick a random cell to execute */
 		//x = getRandom() % POND_SIZE_X;
 		//y = getRandom() % POND_SIZE_Y;
-		x = getRandomFromArray(currRNG) % POND_SIZE_X;
-		y = getRandomFromArray(currRNG) % POND_SIZE_Y;
+		x = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % POND_SIZE_X;
+		y = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % POND_SIZE_Y;
 		currCell = &cellArray[x][y];
-		
-		//uint64_t rngMask = (uint64_t) POND_SIZE_X * POND_SIZE_Y - 1;
-		//printf("rngMask is : %lx\n", rngMask);
-		//printf("masked currRNG is %lx\n", currCell->ID & rngMask);
-		//int currRNG = (currCell->ID & 0x7) + 1;	
-		//printf("hard coded masked currRNG is %lx\n", currRNG);
-		//printf("currRNG is %d\n", currRNG);
+		// sets current RNG to one that correlates with current cell position
+		currRNG = x + POND_SIZE_X * y;
 
 		/* Reset the state of the VM prior to execution */
 		for(i=0;i<MAX_WORDS_GENOME;++i)
