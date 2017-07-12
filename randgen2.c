@@ -258,8 +258,8 @@
  * semi-human-readable if you look at the big switch() statement
  * in the main loop to see what instruction is signified by each
  * four-bit value. */
-#define REPORT_FREQUENCY 10000000
-#define CYCLE_REPORT_FREQUENCY 10
+//#define REPORT_FREQUENCY 10000000
+//#define CYCLE_REPORT_FREQUENCY 10
 
 /* Mutation rate -- range is from 0 (none) to 0xffffffff (all mutations!) */
 /* To get it from a float probability from 0.0 to 1.0, multiply it by
@@ -396,9 +396,9 @@ static void init_genrandArray(unsigned long s)
 	int i, j;
 	// setting values in each array, reusing j to keep track of which index is being processed
 	for (i = 0; i < POND_SIZE_X * POND_SIZE_Y + 1; i++) {
-		rngArray[i][0] = s & 0xffffffffUL;
+		//rngArray[i][0] = s & 0xffffffffUL;
 		// Give each array a different seed, adding on its index to the original passed in seed
-		//rngArray[i][0] = (s + i) & 0xffffffffUL;
+		rngArray[i][0] = (s + i) & 0xffffffffUL;
 		for (j = 1; j < N; j++) {
 			rngArray[i][j] = (1812433253UL * (rngArray[i][j-1] ^ (rngArray[i][j-1] >> 30)) + j);
           		/* See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier. */
@@ -1075,9 +1075,9 @@ printf("array rng 1st time: %lf 2nd time: %lf difference: %lf \n", (float) fcnSt
 
 	// make sure array RNGs are independent
 	/*
-	printf("random from array 1: %d\n", getRandomFromArray(1));
-	printf("random from array 2: %d\n", getRandomFromArray(2));
-	printf("random from array 3: %d\n", getRandomFromArray(3));
+	//printf("random from array 1: %d\n", getRandomFromArray(1));
+	//printf("random from array 2: %d\n", getRandomFromArray(2));
+	//printf("random from array 3: %d\n", getRandomFromArray(3));
 	*/
 	// alternate run to ensure independence
 	//printf("random from array 3: %d\n", getRandomFromArray(3));
