@@ -258,7 +258,7 @@
  * semi-human-readable if you look at the big switch() statement
  * in the main loop to see what instruction is signified by each
  * four-bit value. */
-//#define REPORT_FREQUENCY 10000000
+#define REPORT_FREQUENCY 10000000
 //#define CYCLE_REPORT_FREQUENCY 10
 
 /* Mutation rate -- range is from 0 (none) to 0xffffffff (all mutations!) */
@@ -269,7 +269,7 @@
 /* How frequently should random cells / energy be introduced?
  * Making this too high makes things very chaotic. Making it too low
  * might not introduce enough energy. */
-#define INFLOW_FREQUENCY 160
+#define INFLOW_FREQUENCY 100
 
 /* Base amount of energy to introduce per INFLOW_FREQUENCY ticks */
 #define INFLOW_RATE_BASE 4000
@@ -296,6 +296,11 @@
  * available and you must link with the SDL library when you compile. */
 /* Comment this out to compile without SDL visualization support. */
 //#define USE_SDL 1
+
+/*
+ * To verify against original behavior.
+*/
+#define SINGLE_RNG 1
 
 /* ----------------------------------------------------------------------- */
 
@@ -851,10 +856,17 @@ static inline int accessAllowed(struct Cell *const c2,const uintptr_t c1guess,in
 	* and more probable if they are different in sense 1. Sense 0 is used for
 	* "negative" interactions and sense 1 for "positive" ones. */
 	return sense 
+#ifdef SINGLE_RNG
+		? (((getRandom() & 0xf) >= 
+			BITS_IN_FOURBIT_WORD[(c2->genome[0] & 0xf) ^ (c1guess & 0xf)])||(!c2->parentID)) 
+		: (((getRandom() & 0xf) <= 
+			BITS_IN_FOURBIT_WORD[(c2->genome[0] & 0xf) ^ (c1guess & 0xf)])||(!c2->parentID));
+#else
 		? (((getRandomFromArray(currRNG) & 0xf) >= 
 			BITS_IN_FOURBIT_WORD[(c2->genome[0] & 0xf) ^ (c1guess & 0xf)])||(!c2->parentID)) 
 		: (((getRandomFromArray(currRNG) & 0xf) <= 
 			BITS_IN_FOURBIT_WORD[(c2->genome[0] & 0xf) ^ (c1guess & 0xf)])||(!c2->parentID));
+#endif
 }
 
 /**
@@ -1043,11 +1055,11 @@ int main(int argc,char **argv)
 /**** BEGIN TEST PRINTFS ****/
 	
 /* Seed and init the original random number generator */
-/*	init_genrand(1234567890);
+	init_genrand(1234567890);
 	for(i=0;i<1024;++i) {// init both methods of RNGs	
 	    getRandom();
 	}
-*/
+
 
 	register uint64_t c = 0;
 	// only works on x86. assembly code to read a random number
@@ -1211,20 +1223,33 @@ int main(int argc,char **argv)
 		* entropy into the substrate. This happens every INFLOW_FREQUENCY
 		* clock ticks. */
 		if (!(clock % INFLOW_FREQUENCY)) {
+#ifdef SINGLE_RNG
+			x = getRandom() % POND_SIZE_X;
+			y = getRandom() % POND_SIZE_Y;
+#else
 			x = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % POND_SIZE_X;
 			y = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % POND_SIZE_Y;
+#endif
 			currCell = &cellArray[x][y];
 			currCell->ID = cellIdCounter;
 			currCell->parentID = 0;
 			currCell->lineage = cellIdCounter;
 			currCell->generation = 0;
 #ifdef INFLOW_RATE_VARIATION
+	#ifdef SINGLE_RNG
+			currCell->energy += INFLOW_RATE_BASE + (getRandom() % INFLOW_RATE_VARIATION);
+	#else
 			currCell->energy += INFLOW_RATE_BASE + (getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % INFLOW_RATE_VARIATION);
+	#endif
 #else
 			currCell->energy += INFLOW_RATE_BASE;
 #endif /* INFLOW_RATE_VARIATION */
 			for(i=0;i<MAX_WORDS_GENOME;++i) 
+#ifdef SINGLE_RNG
+				currCell->genome[i] = getRandom();
+#else
 				currCell->genome[i] = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y);
+#endif
 			++cellIdCounter;
       
       /* Update the random cell on SDL screen if viz is enabled */
@@ -1239,10 +1264,13 @@ int main(int argc,char **argv)
 		}
     
 		/* Pick a random cell to execute */
-		//x = getRandom() % POND_SIZE_X;
-		//y = getRandom() % POND_SIZE_Y;
+#ifdef SINGLE_RNG
+		x = getRandom() % POND_SIZE_X;
+		y = getRandom() % POND_SIZE_Y;
+#else
 		x = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % POND_SIZE_X;
 		y = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % POND_SIZE_Y;
+#endif
 		currCell = &cellArray[x][y];
 		// sets current RNG to one that correlates with current cell position
 		currRNG = x + POND_SIZE_X * y;
@@ -1282,10 +1310,13 @@ int main(int argc,char **argv)
 			* it can have all manner of different effects on the end result of
 			* replication: insertions, deletions, duplications of entire
 			* ranges of the genome, etc. */
-			//if ((getRandom() & 0xffffffff) < MUTATION_RATE) {
+#ifdef SINGLE_RNG
+			if ((getRandom() & 0xffffffff) < MUTATION_RATE) {
+				tmp = getRandom(); /* Call getRandom() only once for speed */
+#else
 			if ((getRandomFromArray(currRNG) & 0xffffffff) < MUTATION_RATE) {
-				//tmp = getRandom(); /* Call getRandom() only once for speed */
 				tmp = getRandomFromArray(currRNG); /* Call getRandom() only once for speed */
+#endif
 				//printf("clock cycle: %d currRNG: %d\n", clock, currRNG);
 				if (tmp & 0x80) /* Check for the 8th bit to get random boolean */
 					inst = tmp & 0xf; /* Only the first four bits are used here */
