@@ -554,7 +554,7 @@ static inline uintptr_t getRandom()
 	else 
 		//return (uintptr_t)genrand_int32();
 		result = (uintptr_t)genrand_int32();
-	printf("random %lu drawn\n", result);
+	//printf("random %lu drawn\n", result);
 	return result;
 }
 
@@ -1061,9 +1061,9 @@ int main(int argc,char **argv)
 	
 /* Seed and init the original random number generator */
 	init_genrand(1234567890);
-	//for(i=0;i<1024;++i) {// init both methods of RNGs	
+	for(i=0;i<1024;++i) {// init both methods of RNGs	
 	    getRandom();
-	//}
+	}
 
 
 	register uint64_t c = 0;
@@ -1225,18 +1225,19 @@ int main(int argc,char **argv)
 		//	doCycleReport(clock);
 #endif /* REPORT_FREQUENCY */
 
-		startRow = getRandom() % 3;
 
 		/* Introduce a random cell somewhere with a given energy level */
 		/* This is called seeding, and introduces both energy and
 		* entropy into the substrate. This happens every INFLOW_FREQUENCY
 		* clock ticks. */
-		if (!(clock % INFLOW_FREQUENCY)) {
 #ifdef SINGLE_RNG
+		//startRow = getRandom() % 3;
+		if (!(clock % INFLOW_FREQUENCY)) {
 			x = getRandom() % POND_SIZE_X;
 			y = getRandom() % POND_SIZE_Y;
 			
 #else
+		if (!(clock % INFLOW_FREQUENCY)) {
 			x = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % POND_SIZE_X;
 			y = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % POND_SIZE_Y;
 #endif
@@ -1276,9 +1277,9 @@ int main(int argc,char **argv)
 		/* Pick a random cell to execute */
 #ifdef SINGLE_RNG
 		x = getRandom() % POND_SIZE_X;
-		//y = getRandom() % POND_SIZE_Y;
+		y = getRandom() % POND_SIZE_Y;
 		//for testing
-		y = startRow + (3 * i);
+		//y = startRow + (3 * i);
 #else
 		x = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % POND_SIZE_X;
 		y = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % POND_SIZE_Y;
@@ -1312,8 +1313,8 @@ int main(int argc,char **argv)
 		statCounters.cellExecutions += 1.0;
 
 //for RNG testing against parallelEdit
-printf("next random number is: %lu\n", getRandom());
-exit(0);
+//printf("next random number is: %lu\n", getRandom());
+//exit(0);
 
 		/* Core execution loop */
 		while (currCell->energy&&(!stop)) {
