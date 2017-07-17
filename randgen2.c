@@ -244,13 +244,13 @@
 /* ----------------------------------------------------------------------- */
 
 /* Time in seconds after which to stop at. Comment this out to run forever. */
-#define STOP_AT 100
+//#define STOP_AT 100
 
 /* Frequency of comprehensive updates-- lower values will provide more
  * info while slowing down the simulation. Higher values will give less
  * frequent updates. */
 /* This is also the frequency of screen refreshes if SDL is enabled. */
-#define UPDATE_FREQUENCY 100000
+#define UPDATE_FREQUENCY 1000000
 
 /* Frequency at which to report all viable replicators (generation > 2)
  * to a file named <clock>.report in the current directory.  Comment
@@ -564,14 +564,14 @@ static inline uintptr_t getRandomFromArray(int whichRNG)
 	if (sizeof(uintptr_t) == 8) {
 		//for testing
 		result = (uintptr_t)((((uint64_t)genrand_int32Array(whichRNG)) << 32) ^ ((uint64_t)genrand_int32Array(whichRNG)));
-		printf("rng %d spit out num %d on index %d  with 1st rand num in array %d\n", whichRNG, result, rngIndexArray[whichRNG], rngArray[whichRNG][0]);
+		//printf("rng %d spit out num %d on index %d  with 1st rand num in array %d\n", whichRNG, result, rngIndexArray[whichRNG], rngArray[whichRNG][0]);
 		
 		//return (uintptr_t)((((uint64_t)genrand_int32Array(whichRNG)) << 32) ^ ((uint64_t)genrand_int32Array(whichRNG)));
 	// For regular 32 bit boxes
 	} else { 
 		// for testing
 		result = (uintptr_t)genrand_int32Array(whichRNG);
-		printf("rng %d spit out num %d on index %d  with 1st rand num in array %d\n", whichRNG, result, rngIndexArray[whichRNG], rngArray[whichRNG][0]);
+		//printf("rng %d spit out num %d on index %d  with 1st rand num in array %d\n", whichRNG, result, rngIndexArray[whichRNG], rngArray[whichRNG][0]);
 		
 		//return (uintptr_t)genrand_int32Array(whichRNG);
 	}
@@ -1049,12 +1049,23 @@ int main(int argc,char **argv)
 	}
 */
 
+	register uint64_t c = 0;
+	// only works on x86. assembly code to read a random number
+	// // into register provided, c
+	__asm__ __volatile__ (
+	"RDRAND %0;"
+	:"=r"(c)
+	:
+	:
+	);
+
 // Measure how long it takes to seed and init the array of RNG arrays
 	struct timeval fcnStart, fcnStop;
 	gettimeofday(&fcnStart, NULL);
 
 	// Seed and init array rngs
-	init_genrandArray(1234567890);
+	//init_genrandArray(1234567890);
+	init_genrandArray(c);
 	//for(i=0;i<1024;++i) {// init both methods of RNGs	
 		for (j = 0; j < POND_SIZE_X * POND_SIZE_Y; j++) {
 			//printf("random from array index %d: %d\n",j, getRandomFromArray(j));
@@ -1065,7 +1076,7 @@ int main(int argc,char **argv)
 	gettimeofday(&fcnStop, NULL);
 
 // print out times before and after function, and then the difference
-printf("array rng 1st time: %lf 2nd time: %lf difference: %lf \n", (float) fcnStart.tv_sec, (float) fcnStop.tv_sec, (fcnStop.tv_sec - fcnStart.tv_sec) + (fcnStop.tv_usec - fcnStart.tv_usec)/1000000.0);	
+//printf("array rng 1st time: %lf 2nd time: %lf difference: %lf \n", (float) fcnStart.tv_sec, (float) fcnStop.tv_sec, (fcnStop.tv_sec - fcnStart.tv_sec) + (fcnStop.tv_usec - fcnStart.tv_usec)/1000000.0);	
 
 /*  These tests call the random functions, so comment out if all arrays should be on the same index! */
 	// compare original and new methods' 32int randoms
@@ -1082,7 +1093,7 @@ printf("array rng 1st time: %lf 2nd time: %lf difference: %lf \n", (float) fcnSt
 	// alternate run to ensure independence
 	//printf("random from array 3: %d\n", getRandomFromArray(3));
 	//printf("random from array 2: %d\n", getRandomFromArray(2));
-	//printf("random from array 1: %d\n", getRandomFromArray(1));
+	
 
 /**** END TEST PRINTFS ****/
     

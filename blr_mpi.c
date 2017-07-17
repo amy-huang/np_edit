@@ -233,7 +233,7 @@
 /* ----------------------------------------------------------------------- */
 
 /* Iteration to stop at. Comment this out to run forever. */
-#define STOP_AT 150000000000ULL 
+//#define STOP_AT 150000000000ULL 
 
 /* Frequency of comprehensive reports-- lower values will provide more
  * info while slowing down the simulation. Higher values will give less
@@ -789,9 +789,20 @@ int main(int argc,char **argv)
   
   /* Buffer used for execution output of candidate offspring */
   uintptr_t outputBuf[POND_DEPTH_SYSWORDS];
-  
+  register uint64_t c = 0;
+
+  // only works on x86. assembly code to read a random number
+  // into register provided, c
+  __asm__ __volatile__ (
+  "RDRAND %0;"
+  :"=r"(c)
+  :
+  :
+  );
+
   /* Seed and init the random number generator */
-  init_genrand(time(NULL));
+  //printf("rand/m #: %lu", c);
+  init_genrand(c);
   for(i=0;i<1024;++i)
     getRandom();
 
