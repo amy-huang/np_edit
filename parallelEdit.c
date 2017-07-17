@@ -131,6 +131,7 @@ struct PerUpdateStatCounters
 
 struct PerUpdateStatCounters statCounters; 
 
+
 static void doUpdate(const uint64_t clock)
 {
 	static uint64_t lastTotalViableReplicators = 0;
@@ -243,6 +244,7 @@ static void doReport(const uint64_t clock)
 							break;
 					} else 
 						stopCount = 0;
+					
 					if ((shiftPtr += 4) >= BITS_IN_WORD) {
 						if (++wordPtr >= MAX_WORDS_GENOME) {
 							wordPtr = 0;
@@ -251,6 +253,9 @@ static void doReport(const uint64_t clock)
 							shiftPtr = 0;
 					}
 				}
+			}
+		}
+	}
 }
 
 /**
@@ -264,7 +269,7 @@ static inline struct Cell *getNeighbor(const uintptr_t x,const uintptr_t y,const
 		case N_RIGHT: 	return (x < (POND_SIZE_X-1)) ? &cellArray[x+1][y] : &cellArray[0][y];
 		case N_UP: 	return (y) ? &cellArray[x][y-1] : &cellArray[x][POND_SIZE_Y-1];
 		case N_DOWN: 	return (y < (POND_SIZE_Y-1)) ? &cellArray[x][y+1] : &cellArray[x][0];
-	}
+	} 
 	return &cellArray[x][y]; /* This should never be reached */
 }
 
@@ -298,7 +303,7 @@ int main()  {
 
 	/* Clear the cellArray and initialize all genomes
 	* to 0xffff... */
-/*	for(x=0;x<POND_SIZE_X;++x) {
+	for(x=0;x<POND_SIZE_X;++x) {
 		for(y=0;y<POND_SIZE_Y;++y) {
 			cellArray[x][y].ID = 0;
 			cellArray[x][y].parentID = 0;
@@ -309,7 +314,7 @@ int main()  {
 				cellArray[x][y].genome[i] = ~((uintptr_t)0);
 		}
 	}
-*/
+
     //Seeding RNG with assembly instruction
 	register uint64_t c = 0;
 	// only works on x86. assembly code to read a random number
@@ -351,7 +356,7 @@ gettimeofday(&fcnStart, NULL);
         #pragma omp for  
         for (i = 0; i < NUM_THREADS; i++) {
 	//	#pragma omp ordered
-            printf("on thread %d\n", omp_get_thread_num());
+            printf("current thread %d\n", omp_get_thread_num());
             int cellIndex;
             cellIndex = randomLocationX[i] + POND_SIZE_X * randomLocationY[i];
             printf("cellIndex %lu is %lu\n", i, cellIndex);
