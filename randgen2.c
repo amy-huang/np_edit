@@ -300,7 +300,7 @@
 /*
  * To verify against original behavior.
 */
-#define SINGLE_RNG 1
+//#define SINGLE_RNG 1
 
 /* ----------------------------------------------------------------------- */
 
@@ -401,9 +401,10 @@ static void init_genrandArray(unsigned long s)
 	int i, j;
 	// setting values in each array, reusing j to keep track of which index is being processed
 	for (i = 0; i < POND_SIZE_X * POND_SIZE_Y + 1; i++) {
-		//rngArray[i][0] = s & 0xffffffffUL;
+		// fixed seed for testing
+		rngArray[i][0] = s & 0xffffffffUL;
 		// Give each array a different seed, adding on its index to the original passed in seed
-		rngArray[i][0] = (s + i) & 0xffffffffUL;
+		//rngArray[i][0] = (s + i) & 0xffffffffUL;
 		for (j = 1; j < N; j++) {
 			rngArray[i][j] = (1812433253UL * (rngArray[i][j-1] ^ (rngArray[i][j-1] >> 30)) + j);
           		/* See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier. */
@@ -586,6 +587,7 @@ static inline uintptr_t getRandomFromArray(int whichRNG)
 		//return (uintptr_t)genrand_int32Array(whichRNG);
 	}
 	//for testing
+	printf("random %lu drawn\n", result);
 	return result;
 }
 
@@ -1041,7 +1043,7 @@ static void timeHandler(struct itimerval tval) {
 int main(int argc,char **argv)
 {
 	uintptr_t i,j,x,y;
-    
+	int cellPickIndex = POND_SIZE_X * POND_SIZE_Y;	    
 
 
 #ifdef STOP_AT
@@ -1080,14 +1082,15 @@ int main(int argc,char **argv)
 	struct timeval fcnStart, fcnStop;
 	gettimeofday(&fcnStart, NULL);
 
-	// Seed and init array rngs
-	//init_genrandArray(1234567890);
-	init_genrandArray(c);
+	// Seed and init cell picker RNG
+	init_genrandArray(1234567890);
+	//init_genrandArray(c);
 	//for(i=0;i<1024;++i) {// init both methods of RNGs	
-		for (j = 0; j < POND_SIZE_X * POND_SIZE_Y; j++) {
+		//for (j = 0; j < POND_SIZE_X * POND_SIZE_Y; j++) {
 			//printf("random from array index %d: %d\n",j, getRandomFromArray(j));
-			getRandomFromArray(j);
-		}
+			//getRandomFromArray(j);
+			getRandomFromArray(cellPickIndex);
+		//}
 	//}
 	
 	gettimeofday(&fcnStop, NULL);
@@ -1237,6 +1240,7 @@ int main(int argc,char **argv)
 			y = getRandom() % POND_SIZE_Y;
 			
 #else
+		startRow = getRandomFromArray(cellPickIndex) % 3;
 		if (!(clock % INFLOW_FREQUENCY)) {
 			x = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % POND_SIZE_X;
 			y = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % POND_SIZE_Y;
@@ -1282,7 +1286,9 @@ int main(int argc,char **argv)
 		//y = startRow + (3 * i);
 #else
 		x = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % POND_SIZE_X;
-		y = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % POND_SIZE_Y;
+		//y = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % POND_SIZE_Y;
+		//for testing
+		y = startRow + (3 * i);
 #endif
 		currCell = &cellArray[x][y];
 		// sets current RNG to one that correlates with current cell position
@@ -1313,11 +1319,14 @@ int main(int argc,char **argv)
 		statCounters.cellExecutions += 1.0;
 
 //for RNG testing against parallelEdit
-//printf("next random number is: %lu\n", getRandom());
+//printf("next random number is: %lu\n", getRandomFromArray(cellPickIndex));
 //exit(0);
 
 		/* Core execution loop */
-		while (currCell->energy&&(!stop)) {
+	//	while (currCell->energy&&(!stop)) {
+		// for testing
+		while (1 > 2) {
+
 			/* Get the next instruction */
 			inst = (currentWord >> shiftPtr) & 0xf;
       
@@ -1550,10 +1559,17 @@ int main(int argc,char **argv)
 #endif /* USE_SDL */
 
 
+	//for testing
+	if (clock >= 161) {
+		
+		printf("next random number is: %lu\n", getRandomFromArray(cellPickIndex));
+		exit(0);
+	}
 
 	} // end infinite for loop (core execution loop carrying out instructions)
   
-	exit(0);
+
+	
 	return 0; /* Silences compiler warning */
     
 }
