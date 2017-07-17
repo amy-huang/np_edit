@@ -326,9 +326,10 @@ int main()  {
 	:
 	:
 	);
-    //initializing rngs
+    // Seeding and initializing cell picker RNG
     init_genrandArray(c);
-	// need to init arrays by calling getRandomFromArray 1024 times per cell    
+    for(i=0;i<1024;++i)
+	getRandomFromArray(cellPickIndex);
 
 //begin picking batch loop
     for (;;){
