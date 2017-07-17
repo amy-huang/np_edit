@@ -343,7 +343,6 @@ int main()  {
     for (;;){
 	// pick cells every 3 rows starting from some random offset from the top	
 	startRow = getRandomFromArray(cellPickIndex) % 3;
- 	for (i = 0; i < NUM_THREADS; i++) {
 		if (!(clock % INFLOW_FREQUENCY)) {
 			x = getRandomFromArray(cellPickIndex) % POND_SIZE_X;
 			y = getRandomFromArray(cellPickIndex) % POND_SIZE_Y;
@@ -361,7 +360,25 @@ int main()  {
 				currCell->genome[i] = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y);
 			++cellIDCounter;
 		}
-
+ 	for (i = 0; i < NUM_THREADS; i++) {
+		/*if (!(clock % INFLOW_FREQUENCY)) {
+			x = getRandomFromArray(cellPickIndex) % POND_SIZE_X;
+			y = getRandomFromArray(cellPickIndex) % POND_SIZE_Y;
+			currCell = &cellArray[x][y];
+			currCell->ID = cellIDCounter;
+			currCell->parentID = 0;
+			currCell->lineage = cellIDCounter;
+			currCell->generation = 0;
+#ifdef INFLOW_RATE_VARIATION
+			currCell->energy += INFLOW_RATE_BASE + (getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % INFLOW_RATE_VARIATION);
+#else
+			currCell->energy += INFLOW_RATE_BASE;
+#endif
+			for(i=0;i<MAX_WORDS_GENOME;++i) 
+				currCell->genome[i] = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y);
+			++cellIDCounter;
+		}
+*/
              //printf("random number %lu generated: %lu\n", i, getRandomFromArray(POND_SIZE_X * POND_SIZE_Y));
             randomLocationX[i] = getRandomFromArray(cellPickIndex) % POND_SIZE_X;
             randomLocationY[i] = startRow + (3 * i);
@@ -413,9 +430,10 @@ printf("array rng 1st time: %lf 2nd time: %lf difference: %lf \n", (float) fcnSt
 		clock += NUM_THREADS;
 
 //testing for consistent RNGs after 1 complete batch cycle
-printf("next random number is: %lu\n", getRandomFromArray(cellPickIndex));
+printf("clock is %lu; next random number is: %lu\n", clock, getRandomFromArray(cellPickIndex));
 
 //end picking batch loop
-        exit(0);    //ends forever loop on first iteration
+	if (clock >= 161)
+		exit(0);    //ends forever loop on first iteration
     }
 }
