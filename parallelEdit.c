@@ -300,6 +300,7 @@ int main()  {
 	uintptr_t i,j,x,y;
 	int cellPickIndex = POND_SIZE_X * POND_SIZE_Y;
 	int startRow;
+	struct Cell *currCell;
 
 	/* Clear the cellArray and initialize all genomes
 	* to 0xffff... */
@@ -334,6 +335,23 @@ int main()  {
 	// pick cells every 3 rows starting from some random offset from the top	
 	startRow = getRandomFromArray(cellPickIndex) % 3;
  	for (i = 0; i < NUM_THREADS; i++) {
+		if (!(clock % INFLOW_FREQUENCY)) {
+			x = getRandomFromArray(cellPickIndex) % POND_SIZE_X;
+			y = getRandomFromArray(cellPickIndex) % POND_SIZE_Y;
+			currCell = &cellArray[x][y];
+			currCell->ID = cellIDCounter;
+			currCell->parentID = 0;
+			currCell->lineage = cellIDCounter;
+			currCell->generation = 0;
+#ifdef INFLOW_RATE_VARIATION
+			currCell->energy += INFLOW_RATE_BASE + (getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % INFLOW_RATE_VARIATION);
+#else
+			currCell->energy += INFLOW_RATE_BASE;
+#endif /* INFLOW_RATE_VARIATION */
+			for(i=0;i<MAX_WORDS_GENOME;++i) 
+				currCell->genome[i] = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y);
+			++cellIDCounter;
+
              //printf("random number %lu generated: %lu\n", i, getRandomFromArray(POND_SIZE_X * POND_SIZE_Y));
             randomLocationX[i] = getRandomFromArray(cellPickIndex) % POND_SIZE_X;
             randomLocationY[i] = startRow + (3 * i);
