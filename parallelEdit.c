@@ -306,7 +306,7 @@ int main()  {
 	int cellPickIndex = POND_SIZE_X * POND_SIZE_Y;
 	int startRow;
 	struct Cell *currCell;
-	uint64_t cellIDCounter;
+	uint64_t cellIDCounter = 0;
 	uint64_t clock = 1;
 
 	/* Clear the cellArray and initialize all genomes
@@ -336,14 +336,14 @@ int main()  {
     // Seeding and initializing cell picker RNG
     //init_genrandArray(c);
     init_genrandArray(1234567890);
-    //for(i=0;i<1024;++i)
+//    for(i=0;i<1024;++i)
 	getRandomFromArray(cellPickIndex);
 
 //begin picking batch loop
     for (;;){
 	// pick cells every 3 rows starting from some random offset from the top	
 	startRow = getRandomFromArray(cellPickIndex) % 3;
-// 	for (i = 0; i < NUM_THREADS; i++) {
+ 	for (i = 0; i < NUM_THREADS; i++) {
 		if (!(clock % INFLOW_FREQUENCY)) {
 			x = getRandomFromArray(cellPickIndex) % POND_SIZE_X;
 			y = getRandomFromArray(cellPickIndex) % POND_SIZE_Y;
@@ -366,7 +366,7 @@ int main()  {
             randomLocationX[i] = getRandomFromArray(cellPickIndex) % POND_SIZE_X;
             randomLocationY[i] = startRow + (3 * i);
             //printf("random location x: %lu y: %lu\n", randomLocationX[i], randomLocationY[i]);
-  //      }
+        }
 
 /*
 	//picking a truly random batch of numbers. 
@@ -381,9 +381,9 @@ int main()  {
 struct timeval fcnStart, fcnStop;
 gettimeofday(&fcnStart, NULL);
 
-	
-printf("next random number is: %lu\n", getRandomFromArray(cellPickIndex));
-exit(0);
+//for RNG testing against randgen	
+//printf("next random number is: %lu\n", getRandomFromArray(cellPickIndex));
+//exit(0);
 
 
 //parallel section! doing smth with those numbers. executin cells
@@ -393,14 +393,15 @@ exit(0);
         #pragma omp for  
         for (i = 0; i < NUM_THREADS; i++) {
 	//	#pragma omp ordered
-            printf("current thread %d\n", omp_get_thread_num());
+ /*           printf("current thread %d\n", omp_get_thread_num());
             int cellIndex;
             cellIndex = randomLocationX[i] + POND_SIZE_X * randomLocationY[i];
             printf("cellIndex %lu is %lu\n", i, cellIndex);
             printf("rng %lu printing rn %lu\n", cellIndex, getRandomFromArray(cellIndex));
-        
+   */     
     		}
 	}
+
 
 gettimeofday(&fcnStop, NULL);
 // print out times before and after function, and then the difference
@@ -411,6 +412,8 @@ printf("array rng 1st time: %lf 2nd time: %lf difference: %lf \n", (float) fcnSt
 	else
 		clock += NUM_THREADS;
 
+//testing for consistent RNGs after 1 complete batch cycle
+printf("next random number is: %lu\n", getRandomFromArray(cellPickIndex));
 
 //end picking batch loop
         exit(0);    //ends forever loop on first iteration
