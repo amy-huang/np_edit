@@ -544,13 +544,18 @@ const char *colorSchemeName[2] = { "KINSHIP", "LINEAGE" };
  */
 static inline uintptr_t getRandom()
 {
+	uintptr_t result;
 	/* A good optimizing compiler should optimize out this if */
 	/* This is to make it work on 64-bit boxes */
 	if (sizeof(uintptr_t) == 8)
-		return (uintptr_t)((((uint64_t)genrand_int32()) << 32) ^ ((uint64_t)genrand_int32()));
+		//return (uintptr_t)((((uint64_t)genrand_int32()) << 32) ^ ((uint64_t)genrand_int32()));
+		result = (uintptr_t)((((uint64_t)genrand_int32()) << 32) ^ ((uint64_t)genrand_int32()));
 	// For regular 32 bit boxes
-    else 
-		return (uintptr_t)genrand_int32();
+	else 
+		//return (uintptr_t)genrand_int32();
+		result = (uintptr_t)genrand_int32();
+	printf("random %lu drawn\n", result);
+	return result;
 }
 
 /**
@@ -1056,9 +1061,9 @@ int main(int argc,char **argv)
 	
 /* Seed and init the original random number generator */
 	init_genrand(1234567890);
-	for(i=0;i<1024;++i) {// init both methods of RNGs	
+	//for(i=0;i<1024;++i) {// init both methods of RNGs	
 	    getRandom();
-	}
+	//}
 
 
 	register uint64_t c = 0;
@@ -1157,6 +1162,8 @@ int main(int argc,char **argv)
 	int stop;			/* If this is nonzero, cell execution stops. This allows us
 					* to avoid the ugly use of a goto to exit the loop. :) */
 	int currRNG = 0;
+	int startRow;	// for testing with parallelEdit
+
 #ifdef USE_SDL
 	/* Set up SDL if we're using it */
 	Initialize_SDL2();
@@ -1218,6 +1225,8 @@ int main(int argc,char **argv)
 		//	doCycleReport(clock);
 #endif /* REPORT_FREQUENCY */
 
+		startRow = getRandom() % 3;
+
 		/* Introduce a random cell somewhere with a given energy level */
 		/* This is called seeding, and introduces both energy and
 		* entropy into the substrate. This happens every INFLOW_FREQUENCY
@@ -1226,6 +1235,7 @@ int main(int argc,char **argv)
 #ifdef SINGLE_RNG
 			x = getRandom() % POND_SIZE_X;
 			y = getRandom() % POND_SIZE_Y;
+			
 #else
 			x = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % POND_SIZE_X;
 			y = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % POND_SIZE_Y;
@@ -1266,7 +1276,9 @@ int main(int argc,char **argv)
 		/* Pick a random cell to execute */
 #ifdef SINGLE_RNG
 		x = getRandom() % POND_SIZE_X;
-		y = getRandom() % POND_SIZE_Y;
+		//y = getRandom() % POND_SIZE_Y;
+		//for testing
+		y = startRow + (3 * i);
 #else
 		x = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % POND_SIZE_X;
 		y = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % POND_SIZE_Y;
@@ -1298,6 +1310,10 @@ int main(int argc,char **argv)
     
 		/* Keep track of how many cells have been executed */
 		statCounters.cellExecutions += 1.0;
+
+//for RNG testing against parallelEdit
+printf("next random number is: %lu\n", getRandom());
+exit(0);
 
 		/* Core execution loop */
 		while (currCell->energy&&(!stop)) {
