@@ -27,7 +27,7 @@
 #define MAX_NUM_INSTR 512
 #define FAILED_KILL_PENALTY 2
 
-#define NUM_THREADS 8
+#define NUM_THREADS 160
 
 #define MAX_WORDS_GENOME (MAX_NUM_INSTR / (sizeof(uintptr_t) * 2))
 #define BITS_IN_WORD (sizeof(uintptr_t) * 8)
@@ -297,9 +297,9 @@ unsigned long randomLocationY[NUM_THREADS];
 
 //main
 int main()  {
-    uintptr_t i,j,x,y;
-    int cellPickIndex = POND_SIZE_X * POND_SIZE_Y;
-
+	uintptr_t i,j,x,y;
+	int cellPickIndex = POND_SIZE_X * POND_SIZE_Y;
+	int startRow;
 
 	/* Clear the cellArray and initialize all genomes
 	* to 0xffff... */
@@ -331,16 +331,24 @@ int main()  {
 
 //begin picking batch loop
     for (;;){
-	
+	// pick cells every 3 rows starting from some random offset from the top	
+	startRow = getRandomFromArray(cellPickIndex) % 3;
+ 	for (i = 0; i < NUM_THREADS; i++) {
+             //printf("random number %lu generated: %lu\n", i, getRandomFromArray(POND_SIZE_X * POND_SIZE_Y));
+            randomLocationX[i] = getRandomFromArray(cellPickIndex) % POND_SIZE_X;
+            randomLocationY[i] = startRow + (3 * i);
+            printf("random location x: %lu y: %lu\n", randomLocationX[i], randomLocationY[i]);
+        }
 
-	//picking batch of numbers. 
+/*
+	//picking a truly random batch of numbers. 
         for (i = 0; i < NUM_THREADS; i++) {
              //printf("random number %lu generated: %lu\n", i, getRandomFromArray(POND_SIZE_X * POND_SIZE_Y));
             randomLocationX[i] = getRandomFromArray(cellPickIndex) % POND_SIZE_X;
             randomLocationY[i] = getRandomFromArray(cellPickIndex) % POND_SIZE_Y;
             printf("random location x: %lu y: %lu\n", randomLocationX[i], randomLocationY[i]);
         }
-
+*/
 // to measure how much parallelizing makes this loop faster
 struct timeval fcnStart, fcnStop;
 gettimeofday(&fcnStart, NULL);
