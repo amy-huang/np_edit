@@ -269,7 +269,7 @@
 /* How frequently should random cells / energy be introduced?
  * Making this too high makes things very chaotic. Making it too low
  * might not introduce enough energy. */
-#define INFLOW_FREQUENCY 100
+#define INFLOW_FREQUENCY 160
 
 /* Base amount of energy to introduce per INFLOW_FREQUENCY ticks */
 #define INFLOW_RATE_BASE 4000
@@ -1558,9 +1558,9 @@ int main(int argc,char **argv)
 			SDL_UnlockSurface(screen);
 #endif /* USE_SDL */
 
-
+	printf("clock is %lu", clock);
 	//for testing
-	if (clock >= 161) {
+	if (clock >= 319) {
 		
 		printf("next random number is: %lu\n", getRandomFromArray(cellPickIndex));
 		exit(0);
