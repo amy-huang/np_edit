@@ -53,7 +53,8 @@ static void init_genrandArray(unsigned long s)
 {
         int i, j;
         for (i = 0; i < POND_SIZE_X * POND_SIZE_Y + 1; i++) {
-            rngArray[i][0] = (s + i) & 0xffffffffUL;
+            //rngArray[i][0] = (s + i) & 0xffffffffUL;
+            rngArray[i][0] = (s) & 0xffffffffUL;
             for (j = 1; j < N; j++) {
                 rngArray[i][j] = (1812433253UL * (rngArray[i][j-1] ^ (rngArray[i][j-1] >> 30)) + j);
                 rngArray[i][j] &= 0xffffffffUL;
@@ -100,10 +101,14 @@ static inline uintptr_t getRandomFromArray(int whichRNG)
     uintptr_t result;
 
     if (sizeof(uintptr_t) == 8) {
-        return (uintptr_t)((((uint64_t)genrand_int32Array(whichRNG)) << 32) ^ ((uint64_t)genrand_int32Array(whichRNG)));
+        //return (uintptr_t)((((uint64_t)genrand_int32Array(whichRNG)) << 32) ^ ((uint64_t)genrand_int32Array(whichRNG)));
+        result = (uintptr_t)((((uint64_t)genrand_int32Array(whichRNG)) << 32) ^ ((uint64_t)genrand_int32Array(whichRNG)));
     } else {
-        return (uintptr_t)genrand_int32Array(whichRNG);
+        //return (uintptr_t)genrand_int32Array(whichRNG);
+        result = (uintptr_t)genrand_int32Array(whichRNG);
     }
+    printf("random %lu drawn\n", result);
+    return result;
 }
 
 //central structures
@@ -301,6 +306,8 @@ int main()  {
 	int cellPickIndex = POND_SIZE_X * POND_SIZE_Y;
 	int startRow;
 	struct Cell *currCell;
+	uint64_t cellIDCounter;
+	uint64_t clock = 1;
 
 	/* Clear the cellArray and initialize all genomes
 	* to 0xffff... */
@@ -327,15 +334,16 @@ int main()  {
 	:
 	);
     // Seeding and initializing cell picker RNG
-    init_genrandArray(c);
-    for(i=0;i<1024;++i)
+    //init_genrandArray(c);
+    init_genrandArray(1234567890);
+    //for(i=0;i<1024;++i)
 	getRandomFromArray(cellPickIndex);
 
 //begin picking batch loop
     for (;;){
 	// pick cells every 3 rows starting from some random offset from the top	
 	startRow = getRandomFromArray(cellPickIndex) % 3;
- 	for (i = 0; i < NUM_THREADS; i++) {
+// 	for (i = 0; i < NUM_THREADS; i++) {
 		if (!(clock % INFLOW_FREQUENCY)) {
 			x = getRandomFromArray(cellPickIndex) % POND_SIZE_X;
 			y = getRandomFromArray(cellPickIndex) % POND_SIZE_Y;
@@ -352,12 +360,13 @@ int main()  {
 			for(i=0;i<MAX_WORDS_GENOME;++i) 
 				currCell->genome[i] = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y);
 			++cellIDCounter;
+		}
 
              //printf("random number %lu generated: %lu\n", i, getRandomFromArray(POND_SIZE_X * POND_SIZE_Y));
             randomLocationX[i] = getRandomFromArray(cellPickIndex) % POND_SIZE_X;
             randomLocationY[i] = startRow + (3 * i);
-            printf("random location x: %lu y: %lu\n", randomLocationX[i], randomLocationY[i]);
-        }
+            //printf("random location x: %lu y: %lu\n", randomLocationX[i], randomLocationY[i]);
+  //      }
 
 /*
 	//picking a truly random batch of numbers. 
@@ -373,7 +382,8 @@ struct timeval fcnStart, fcnStop;
 gettimeofday(&fcnStart, NULL);
 
 	
-
+printf("next random number is: %lu\n", getRandomFromArray(cellPickIndex));
+exit(0);
 
 
 //parallel section! doing smth with those numbers. executin cells
@@ -395,6 +405,12 @@ gettimeofday(&fcnStart, NULL);
 gettimeofday(&fcnStop, NULL);
 // print out times before and after function, and then the difference
 printf("array rng 1st time: %lf 2nd time: %lf difference: %lf \n", (float) fcnStart.tv_sec, (float) fcnStop.tv_sec, (fcnStop.tv_sec - fcnStart.tv_sec) + (fcnStop.tv_usec - fcnStart.tv_usec)/1000000.0); 
+
+	if (clock == 1) 
+		clock += NUM_THREADS - 1;
+	else
+		clock += NUM_THREADS;
+
 
 //end picking batch loop
         exit(0);    //ends forever loop on first iteration
