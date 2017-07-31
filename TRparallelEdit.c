@@ -14,7 +14,7 @@
 #include <omp.h>
 
 // pond constants
-#define STOP_AT 1
+#define STOP_AT 1000000
 #define UPDATE_FREQUENCY 1000000
 #define REPORT_FREQUENCY 100000000
 #define CLOCKUPDATE_FREQUENCY 10000
@@ -661,6 +661,8 @@ static void timeHandler(struct itimerval tval) {
 
 //main
 int main()  {
+	struct timeval runStart, runStop;
+	gettimeofday(&runStart, NULL);
 
 #ifdef STOP_AT
 	struct itimerval tvalStop;
@@ -760,10 +762,14 @@ int main()  {
 	++cellIDCounter;
 	}
 
-/* #ifdef STOP_AT
-        if ((clock >= STOP_AT))
-                exit(0);
-#endif */
+ #ifdef STOP_AT
+        if ((clock >= STOP_AT)) {
+                
+		gettimeofday(&runStop, NULL);
+		printf("run start: %lf run stop: %lf difference: %lf \n", (float) runStart.tv_sec, (float) runStop.tv_sec, (runStop.tv_sec - runStart.tv_sec) + (runStop.tv_usec - runStart.tv_usec)/1000000.0); 
+		exit(0);
+	}
+#endif 
 
 //testing for consistent RNGs after 1 complete batch cycle
 //printf("clock is %lu; next random number is: %lu\n", clock, getRandomFromArray(cellPickIndex));
