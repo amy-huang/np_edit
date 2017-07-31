@@ -18,7 +18,7 @@
 #define UPDATE_FREQUENCY 1000000
 #define REPORT_FREQUENCY 100000000
 #define CLOCKUPDATE_FREQUENCY 10000
-#define CLOCKREPORT_FREQUENCY 1000000
+#define CLOCKREPORT_FREQUENCY 10000000
 #define MUTATION_RATE 21475
 #define INFLOW_FREQUENCY 100
 #define INFLOW_RATE_BASE 4000
@@ -433,7 +433,7 @@ void pickBatch() {
 for (i = 0; i < BATCH_SIZE; i++) {     
         int x = getRandomFromArray(cellPickIndex) % POND_SIZE_X;
         int y = getRandomFromArray(cellPickIndex) % POND_SIZE_Y;
-     
+    /* commented out to choose locations randomly 
    memset(cellConflicts, 0, sizeof(cellConflicts));
 
         while (cellConflicts[x][y] > 0) { 
@@ -447,7 +447,7 @@ for (i = 0; i < BATCH_SIZE; i++) {
         cellConflicts[x - 1][y] = 1; 
         cellConflicts[x][y + 1] = 1; 
         cellConflicts[x][y - 1] = 1; 
-     
+     */
         randomLocationX[i] = x; 
         randomLocationY[i] = y; 
 
@@ -736,7 +736,7 @@ int main()  {
 
 	// Finish timing parallel loop and print out time taken
 	gettimeofday(&fcnStop, NULL);
-	printf("array rng 1st time: %lf 2nd time: %lf difference: %lf \n", (float) fcnStart.tv_sec, (float) fcnStop.tv_sec, (fcnStop.tv_sec - fcnStart.tv_sec) + (fcnStop.tv_usec - fcnStart.tv_usec)/1000000.0); 
+//	printf("array rng 1st time: %lf 2nd time: %lf difference: %lf \n", (float) fcnStart.tv_sec, (float) fcnStop.tv_sec, (fcnStop.tv_sec - fcnStart.tv_sec) + (fcnStop.tv_usec - fcnStart.tv_usec)/1000000.0); 
 
 	// Increment clock by batch size
 	clock += BATCH_SIZE;

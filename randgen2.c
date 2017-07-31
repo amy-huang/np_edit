@@ -250,7 +250,7 @@
  * info while slowing down the simulation. Higher values will give less
  * frequent updates. */
 /* This is also the frequency of screen refreshes if SDL is enabled. */
-#define UPDATE_FREQUENCY 1000000
+#define UPDATE_FREQUENCY 100000
 
 /* Frequency at which to report all viable replicators (generation > 2)
  * to a file named <clock>.report in the current directory.  Comment
@@ -258,7 +258,8 @@
  * semi-human-readable if you look at the big switch() statement
  * in the main loop to see what instruction is signified by each
  * four-bit value. */
-#define REPORT_FREQUENCY 10000000
+  #define REPORT_FREQUENCY 10000000
+//#define REPORT_FREQUENCY 100000000
 //#define CYCLE_REPORT_FREQUENCY 10
 
 /* Mutation rate -- range is from 0 (none) to 0xffffffff (all mutations!) */
@@ -269,7 +270,7 @@
 /* How frequently should random cells / energy be introduced?
  * Making this too high makes things very chaotic. Making it too low
  * might not introduce enough energy. */
-#define INFLOW_FREQUENCY 160
+#define INFLOW_FREQUENCY 100
 
 /* Base amount of energy to introduce per INFLOW_FREQUENCY ticks */
 #define INFLOW_RATE_BASE 4000
@@ -402,9 +403,9 @@ static void init_genrandArray(unsigned long s)
 	// setting values in each array, reusing j to keep track of which index is being processed
 	for (i = 0; i < POND_SIZE_X * POND_SIZE_Y + 1; i++) {
 		// fixed seed for testing
-		rngArray[i][0] = s & 0xffffffffUL;
+		//rngArray[i][0] = s & 0xffffffffUL;
 		// Give each array a different seed, adding on its index to the original passed in seed
-		//rngArray[i][0] = (s + i) & 0xffffffffUL;
+		rngArray[i][0] = (s + i) & 0xffffffffUL;
 		for (j = 1; j < N; j++) {
 			rngArray[i][j] = (1812433253UL * (rngArray[i][j-1] ^ (rngArray[i][j-1] >> 30)) + j);
           		/* See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier. */
@@ -587,7 +588,7 @@ static inline uintptr_t getRandomFromArray(int whichRNG)
 		//return (uintptr_t)genrand_int32Array(whichRNG);
 	}
 	//for testing
-	printf("random %lu drawn\n", result);
+//	printf("random %lu drawn\n", result);
 	return result;
 }
 
@@ -1085,13 +1086,13 @@ int main(int argc,char **argv)
 	// Seed and init cell picker RNG
 	init_genrandArray(1234567890);
 	//init_genrandArray(c);
-	//for(i=0;i<1024;++i) {// init both methods of RNGs	
+	for(i=0;i<1024;++i) {// init both methods of RNGs	
 		//for (j = 0; j < POND_SIZE_X * POND_SIZE_Y; j++) {
 			//printf("random from array index %d: %d\n",j, getRandomFromArray(j));
 			//getRandomFromArray(j);
 			getRandomFromArray(cellPickIndex);
 		//}
-	//}
+	}
 	
 	gettimeofday(&fcnStop, NULL);
 
@@ -1240,7 +1241,7 @@ int main(int argc,char **argv)
 			y = getRandom() % POND_SIZE_Y;
 			
 #else
-		startRow = getRandomFromArray(cellPickIndex) % 3;
+//		startRow = getRandomFromArray(cellPickIndex) % 3;
 		if (!(clock % INFLOW_FREQUENCY)) {
 			x = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % POND_SIZE_X;
 			y = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % POND_SIZE_Y;
@@ -1286,9 +1287,9 @@ int main(int argc,char **argv)
 		//y = startRow + (3 * i);
 #else
 		x = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % POND_SIZE_X;
-		//y = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % POND_SIZE_Y;
+		y = getRandomFromArray(POND_SIZE_X * POND_SIZE_Y) % POND_SIZE_Y;
 		//for testing
-		y = startRow + (3 * i);
+		//y = startRow + (3 * i);
 #endif
 		currCell = &cellArray[x][y];
 		// sets current RNG to one that correlates with current cell position
@@ -1558,6 +1559,7 @@ int main(int argc,char **argv)
 			SDL_UnlockSurface(screen);
 #endif /* USE_SDL */
 
+	/*
 	printf("clock is %lu", clock);
 	//for testing
 	if (clock >= 319) {
@@ -1565,7 +1567,7 @@ int main(int argc,char **argv)
 		printf("next random number is: %lu\n", getRandomFromArray(cellPickIndex));
 		exit(0);
 	}
-
+*/
 	} // end infinite for loop (core execution loop carrying out instructions)
   
 
