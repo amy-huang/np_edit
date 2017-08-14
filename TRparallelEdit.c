@@ -462,7 +462,11 @@ for (i = 0; i < BATCH_SIZE; i++) {
         }    
 }
 
-void executeCell(int x, int y) {
+int executeCell(int x, int y) {
+	if (!cellArray[x][y].energy) {
+                return 0;
+        }
+
 	uintptr_t ptr_wordPtr = 0; 
     	uintptr_t ptr_shiftPtr = 0; 
     	uintptr_t reg = 0; 
@@ -664,7 +668,7 @@ void executeCell(int x, int y) {
 		statCounters.viableCellsKilled += cellsKilled;
 		statCounters.viableCellShares += cellsShared;
 	}
-
+	return 1;
 }
 
 void initializePond() {
@@ -746,7 +750,7 @@ int main()  {
 {
         #pragma omp for  
         for (i = 0; i < BATCH_SIZE; i++) {
-		if (cellArray[randomLocationX[i]][randomLocationY[i]].energy)
+		//if (cellArray[randomLocationX[i]][randomLocationY[i]].energy)
 			executeCell(randomLocationX[i], randomLocationY[i]);
 
             //printf("current thread %d\n", omp_get_thread_num());
