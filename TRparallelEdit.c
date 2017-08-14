@@ -14,7 +14,7 @@
 #include <omp.h>
 
 // pond constants
-//#define STOP_AT 1000000
+#define STOP_AT 3000000
 #define UPDATE_FREQUENCY 100000
 #define REPORT_FREQUENCY 10000000
 #define CLOCKUPDATE_FREQUENCY 10000
@@ -138,7 +138,7 @@ struct PerUpdateStatCounters
 struct PerUpdateStatCounters statCounters; 
 
 
-static void doClockUpdate(const uint64_t clock)
+static void doClockUpdate(const uintptr_t clock)
 {
 	static uint64_t lastTotalViableReplicators = 0;
 
@@ -208,7 +208,7 @@ static void doClockUpdate(const uint64_t clock)
 		((uint8_t *)&statCounters)[x] = (uint8_t)0;
 }
 
-static void doUpdate(const uint64_t clock)
+static void doUpdate(const uintptr_t clock)
 {
 	static uint64_t lastTotalViableReplicators = 0;
 
@@ -278,7 +278,7 @@ static void doUpdate(const uint64_t clock)
 		((uint8_t *)&statCounters)[x] = (uint8_t)0;
 }
 
-static void doClockReport(const uint64_t clock)
+static void doClockReport(const uintptr_t clock)
 {
 	char buf[MAX_NUM_INSTR*2];
 	FILE *d;
@@ -333,7 +333,7 @@ static void doClockReport(const uint64_t clock)
 		}
 	}
 }
-static void doReport(const uint64_t clock)
+static void doReport(const uintptr_t clock)
 {
 	char buf[MAX_NUM_INSTR*2];
 	FILE *d;
@@ -447,11 +447,13 @@ for (i = 0; i < BATCH_SIZE; i++) {
         cellConflicts[x - 1][y] = 1; 
         cellConflicts[x][y + 1] = 1; 
         cellConflicts[x][y - 1] = 1; 
-  */   
-//        while (!cellArray[x][y].energy && clock > BATCH_SIZE) {	//make sure cell doesn't conflict and has energy 
+  */  
+      //if (clock - BATCH_SIZE > 0) { 	
+        //while (!cellArray[x][y].energy) {	//make sure cell doesn't conflict and has energy 
                 x = getRandomFromArray(cellPickIndex) % POND_SIZE_X;
                 y = getRandomFromArray(cellPickIndex) % POND_SIZE_Y;
-//        }    
+        //}    
+      //}
 
         randomLocationX[i] = x; 
         randomLocationY[i] = y; 
@@ -718,45 +720,15 @@ int main()  {
 	(void) setitimer(ITIMER_REAL, &tvalStop, NULL);
 #endif
 */
-	uintptr_t i,x,y;
+	int i,x,y;
 	int cellPickIndex = POND_SIZE_X * POND_SIZE_Y;
 	struct Cell *currCell;
-	uint64_t clock = 0;
+	uintptr_t clock = 0;
 	// TODO: allow all cells access to id counter somehow
 	uint64_t cellIDCounter = 0;
 
+	// Sets all cell attributes to 0 and seeds RNGs
 	initializePond();
-  /*	
-	// COULD BE ALL IN 1 FUNCTION
-	// Clear pond and initialize to blank cells
-	for(x=0;x<POND_SIZE_X;++x) {
-		for(y=0;y<POND_SIZE_Y;++y) {
-			cellArray[x][y].ID = 0;
-			cellArray[x][y].parentID = 0;
-			cellArray[x][y].lineage = 0;
-			cellArray[x][y].generation = 0;
-			cellArray[x][y].energy = 0;
-			for(i=0;i<MAX_WORDS_GENOME;++i)
-				cellArray[x][y].genome[i] = ~((uintptr_t)0);
-		}
-	}
-
-    //Seeding RNG with assembly instruction
-	register uint64_t c = 0;
-	// only works on x86. assembly code to read a random number
-	// // into register provided, c
-	__asm__ __volatile__ (
-	"RDRAND %0;"
-	:"=r"(c)
-	:
-	:
-	);
-    // Seeding and initializing cell picker RNG
-    //init_genrandArray(c);
-    init_genrandArray(1234567890);
-    for(i=0;i<1024;++i)
-	getRandomFromArray(cellPickIndex);
-*/
 
     // Batch execution loop
     for (;;){
@@ -774,7 +746,8 @@ int main()  {
 {
         #pragma omp for  
         for (i = 0; i < BATCH_SIZE; i++) {
-		executeCell(randomLocationX[i], randomLocationY[i]);
+		if (cellArray[randomLocationX[i]][randomLocationY[i]].energy)
+			executeCell(randomLocationX[i], randomLocationY[i]);
 
             //printf("current thread %d\n", omp_get_thread_num());
             //int cellIndex;
