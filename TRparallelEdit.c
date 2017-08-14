@@ -14,9 +14,9 @@
 #include <omp.h>
 
 // pond constants
-#define STOP_AT 1000000
-#define UPDATE_FREQUENCY 1000000
-#define REPORT_FREQUENCY 100000000
+//#define STOP_AT 1000000
+#define UPDATE_FREQUENCY 100000
+#define REPORT_FREQUENCY 10000000
 #define CLOCKUPDATE_FREQUENCY 10000
 #define CLOCKREPORT_FREQUENCY 10000000
 #define MUTATION_RATE 21475
@@ -433,10 +433,10 @@ void pickBatch() {
 for (i = 0; i < BATCH_SIZE; i++) {     
         int x = getRandomFromArray(cellPickIndex) % POND_SIZE_X;
         int y = getRandomFromArray(cellPickIndex) % POND_SIZE_Y;
-    /* commented out to choose locations randomly 
-   memset(cellConflicts, 0, sizeof(cellConflicts));
+    //commented out to choose locations randomly 
+/*   memset(cellConflicts, 0, sizeof(cellConflicts));
 
-        while (cellConflicts[x][y] > 0) { 
+        while (cellConflicts[x][y] > 0 && !cellArray[x][y]->energy) {	//make sure cell doesn't conflict and has energy 
                 x = getRandomFromArray(cellPickIndex) % POND_SIZE_X;
                 y = getRandomFromArray(cellPickIndex) % POND_SIZE_Y;
         }    
@@ -447,7 +447,12 @@ for (i = 0; i < BATCH_SIZE; i++) {
         cellConflicts[x - 1][y] = 1; 
         cellConflicts[x][y + 1] = 1; 
         cellConflicts[x][y - 1] = 1; 
-     */
+  */   
+//        while (!cellArray[x][y].energy && clock > BATCH_SIZE) {	//make sure cell doesn't conflict and has energy 
+                x = getRandomFromArray(cellPickIndex) % POND_SIZE_X;
+                y = getRandomFromArray(cellPickIndex) % POND_SIZE_Y;
+//        }    
+
         randomLocationX[i] = x; 
         randomLocationY[i] = y; 
 
@@ -648,39 +653,21 @@ void executeCell(int x, int y) {
       	}
    }
 
+	#pragma omp critical 
+   	{
+		for (i = 0; i < 16; i++) {
+			statCounters.instructionExecutions[i] += instrExecs[i];
+		}
+		statCounters.viableCellsReplaced += cellsReplaced; 
+		statCounters.viableCellsKilled += cellsKilled;
+		statCounters.viableCellShares += cellsShared;
+	}
+
 }
 
-
-
-static void timeHandler(struct itimerval tval) {
-#ifdef STOP_AT
-	printf("\n Time is up. %d seconds have passed.\n", STOP_AT);
-#endif
-	exit(0);
-}
-
-//main
-int main()  {
-	struct timeval runStart, runStop;
-	gettimeofday(&runStart, NULL);
-
-#ifdef STOP_AT
-	struct itimerval tvalStop;
-	tvalStop.it_value.tv_sec = STOP_AT;
-
-	(void) signal(SIGALRM, timeHandler);
-	(void) setitimer(ITIMER_REAL, &tvalStop, NULL);
-#endif
-
-	uintptr_t i,j,x,y;
-	int cellPickIndex = POND_SIZE_X * POND_SIZE_Y;
-	struct Cell *currCell;
-	uint64_t clock = 0;
-	// TODO: allow all cells access to id counter somehow
-	uint64_t cellIDCounter = 0;
-
-	/* Clear the cellArray and initialize all genomes
-	* to 0xffff... */
+void initializePond() {
+	int x = 0, y = 0, i=0;
+	// Clear pond and initialize to blank cells
 	for(x=0;x<POND_SIZE_X;++x) {
 		for(y=0;y<POND_SIZE_Y;++y) {
 			cellArray[x][y].ID = 0;
@@ -708,6 +695,68 @@ int main()  {
     init_genrandArray(1234567890);
     for(i=0;i<1024;++i)
 	getRandomFromArray(cellPickIndex);
+}
+/*
+static void timeHandler(struct itimerval tval) {
+#ifdef STOP_AT
+	printf("\n Time is up. %d seconds have passed.\n", STOP_AT);
+#endif
+	exit(0);
+}
+*/
+
+//main
+int main()  {
+	struct timeval runStart, runStop;
+	gettimeofday(&runStart, NULL);
+/*
+#ifdef STOP_AT
+	struct itimerval tvalStop;
+	tvalStop.it_value.tv_sec = STOP_AT;
+
+	(void) signal(SIGALRM, timeHandler);
+	(void) setitimer(ITIMER_REAL, &tvalStop, NULL);
+#endif
+*/
+	uintptr_t i,x,y;
+	int cellPickIndex = POND_SIZE_X * POND_SIZE_Y;
+	struct Cell *currCell;
+	uint64_t clock = 0;
+	// TODO: allow all cells access to id counter somehow
+	uint64_t cellIDCounter = 0;
+
+	initializePond();
+  /*	
+	// COULD BE ALL IN 1 FUNCTION
+	// Clear pond and initialize to blank cells
+	for(x=0;x<POND_SIZE_X;++x) {
+		for(y=0;y<POND_SIZE_Y;++y) {
+			cellArray[x][y].ID = 0;
+			cellArray[x][y].parentID = 0;
+			cellArray[x][y].lineage = 0;
+			cellArray[x][y].generation = 0;
+			cellArray[x][y].energy = 0;
+			for(i=0;i<MAX_WORDS_GENOME;++i)
+				cellArray[x][y].genome[i] = ~((uintptr_t)0);
+		}
+	}
+
+    //Seeding RNG with assembly instruction
+	register uint64_t c = 0;
+	// only works on x86. assembly code to read a random number
+	// // into register provided, c
+	__asm__ __volatile__ (
+	"RDRAND %0;"
+	:"=r"(c)
+	:
+	:
+	);
+    // Seeding and initializing cell picker RNG
+    //init_genrandArray(c);
+    init_genrandArray(1234567890);
+    for(i=0;i<1024;++i)
+	getRandomFromArray(cellPickIndex);
+*/
 
     // Batch execution loop
     for (;;){
@@ -740,8 +789,9 @@ int main()  {
 	gettimeofday(&fcnStop, NULL);
 //	printf("array rng 1st time: %lf 2nd time: %lf difference: %lf \n", (float) fcnStart.tv_sec, (float) fcnStop.tv_sec, (fcnStop.tv_sec - fcnStart.tv_sec) + (fcnStop.tv_usec - fcnStart.tv_usec)/1000000.0); 
 
-	// Increment clock by batch size
+	// Increment clock and number of cell executions by batch size
 	clock += BATCH_SIZE;
+	statCounters.cellExecutions += BATCH_SIZE;
 	
 	// Introduce random cell with energy. Do this as many times as needed relative to batch size.	
 	for (i = 0; i < BATCH_SIZE / INFLOW_FREQUENCY; i++) {
