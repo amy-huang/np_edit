@@ -23,12 +23,12 @@
 #define INFLOW_FREQUENCY 100
 #define INFLOW_RATE_BASE 4000
 #define INFLOW_RATE_VARIATION 8000
-#define POND_SIZE_X 640
-#define POND_SIZE_Y 480
+#define POND_SIZE_X 600
+#define POND_SIZE_Y 600
 #define MAX_NUM_INSTR 512
 #define FAILED_KILL_PENALTY 2
 
-#define BATCH_SIZE 100
+#define BATCH_SIZE 300 
 
 #define MAX_WORDS_GENOME (MAX_NUM_INSTR / (sizeof(uintptr_t) * 2))
 #define BITS_IN_WORD (sizeof(uintptr_t) * 8)
@@ -428,38 +428,46 @@ unsigned long randomLocationY[BATCH_SIZE];
 int cellConflicts[POND_SIZE_X][POND_SIZE_Y];
 int cellPickIndex = POND_SIZE_X * POND_SIZE_Y;
 
-void pickBatch() {
-        int i;
-for (i = 0; i < BATCH_SIZE; i++) {     
-        int x = getRandomFromArray(cellPickIndex) % POND_SIZE_X;
-        int y = getRandomFromArray(cellPickIndex) % POND_SIZE_Y;
-    //commented out to choose locations randomly 
-/*   memset(cellConflicts, 0, sizeof(cellConflicts));
+int firstX;
+int firstY;
 
-        while (cellConflicts[x][y] > 0 && !cellArray[x][y]->energy) {	//make sure cell doesn't conflict and has energy 
-                x = getRandomFromArray(cellPickIndex) % POND_SIZE_X;
-                y = getRandomFromArray(cellPickIndex) % POND_SIZE_Y;
-        }    
+int pickBatch() {
+        int i = 0, j, x, y;
+	int stopBatch = 0;
+	int sizeBatch = 0;
 
-        //marks adjacent cells as taken for that batch
-        cellConflicts[x][y] = 1; 
-        cellConflicts[x + 1][y] = 1; 
-        cellConflicts[x - 1][y] = 1; 
-        cellConflicts[x][y + 1] = 1; 
-        cellConflicts[x][y - 1] = 1; 
-  */  
-      //if (clock - BATCH_SIZE > 0) { 	
-        //while (!cellArray[x][y].energy) {	//make sure cell doesn't conflict and has energy 
-                x = getRandomFromArray(cellPickIndex) % POND_SIZE_X;
-                y = getRandomFromArray(cellPickIndex) % POND_SIZE_Y;
-        //}    
-      //}
+	// generate at most BATCH_SIZE cells to be executed at once
+	for (i = 1; i < BATCH_SIZE; i++) {     
+        	x = getRandomFromArray(cellPickIndex) % POND_SIZE_X;
+        	y = getRandomFromArray(cellPickIndex) % POND_SIZE_Y;
+      
+		for (j = 0; j < i; j++) {
+			if ((abs(randomLocationX[j] - x) < 3) && (abs(randomLocationY[j] - y) < 3)) {
+				firstX = x;
+				firstY = y;
+				//printf("x = %d another x chosen = %d oh no\n", x, randomLocationX[j]);
+				//printf("y = %d another y chosen = %d oh no\n", y, randomLocationY[j]);
+			 	stopBatch = ~stopBatch;
+				
+				break;	
+			
+			} else {	// next location chosen doesn't conflict with any others in batch
+        			randomLocationX[i] = x; 
+        			randomLocationY[i] = y; 
 
-        randomLocationX[i] = x; 
-        randomLocationY[i] = y; 
+			}
+		}
+		if (stopBatch) {
+			printf("size of batch: % d\n", i);
+			sizeBatch = i;
+			break;
+		}
 
         //printf("random location %d is x: %lu y: %lu\n", i, randomLocationX[i], randomLocationY[i]);
-        }    
+        }   
+
+	//printf("batch ended\n");
+	return sizeBatch;
 }
 
 int executeCell(int x, int y) {
@@ -697,8 +705,8 @@ void initializePond() {
 	:
 	);
     // Seeding and initializing cell picker RNG
-    //init_genrandArray(c);
-    init_genrandArray(1234567890);
+    init_genrandArray(c);
+    //init_genrandArray(1234567890);
     for(i=0;i<1024;++i)
 	getRandomFromArray(cellPickIndex);
 }
@@ -713,6 +721,7 @@ static void timeHandler(struct itimerval tval) {
 
 //main
 int main()  {
+
 	struct timeval runStart, runStop;
 	gettimeofday(&runStart, NULL);
 /*
@@ -725,6 +734,7 @@ int main()  {
 #endif
 */
 	int i,x,y;
+	int sizeBatch;
 	int cellPickIndex = POND_SIZE_X * POND_SIZE_Y;
 	struct Cell *currCell;
 	uintptr_t clock = 0;
@@ -733,6 +743,8 @@ int main()  {
 
 	// Sets all cell attributes to 0 and seeds RNGs
 	initializePond();
+	firstX = getRandomFromArray(cellPickIndex) % POND_SIZE_X; 
+	firstY = getRandomFromArray(cellPickIndex) % POND_SIZE_Y; 
 
     // Batch execution loop
     for (;;){
@@ -743,15 +755,15 @@ int main()  {
 	gettimeofday(&fcnStart, NULL);
 
 	// picking next BATCH_SIZE random locations to execute
-	pickBatch();
+	//for testing speed
+	sizeBatch = pickBatch();
 
 // Parallel for loop to execute each cell
 #pragma omp parallel private(i) 
 {
         #pragma omp for  
-        for (i = 0; i < BATCH_SIZE; i++) {
-		//if (cellArray[randomLocationX[i]][randomLocationY[i]].energy)
-			executeCell(randomLocationX[i], randomLocationY[i]);
+        for (i = 0; i < sizeBatch; i++) {
+		executeCell(randomLocationX[i], randomLocationY[i]);
 
             //printf("current thread %d\n", omp_get_thread_num());
             //int cellIndex;
