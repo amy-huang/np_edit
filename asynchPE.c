@@ -13,13 +13,13 @@
 #include <omp.h>
 
 // pond constants
-#define STOP_AT 3000000
+#define STOP_AT 300000
 #define UPDATE_FREQUENCY 100000
 #define REPORT_FREQUENCY 10000
 #define CLOCKUPDATE_FREQUENCY 100
 #define CLOCKREPORT_FREQUENCY 10000
 #define MUTATION_RATE 21475
-#define INFLOW_FREQUENCY 100
+//#define INFLOW_FREQUENCY 100
 #define INFLOW_RATE_BASE 4000
 #define INFLOW_RATE_VARIATION 8000
 #define POND_SIZE_X 600
@@ -711,8 +711,8 @@ void initializePond() {
 	:
 	);
     // Seeding and initializing cell picker RNG
-    init_genrandArray(c);
-    //init_genrandArray(1234567890);
+    //init_genrandArray(c);
+    init_genrandArray(1234567890);
     for(i=0;i<1024;++i)
 	getRandomFromArray(cellPickIndex);
 }
@@ -762,14 +762,17 @@ int main()  {
 
 	// picking next BATCH_SIZE random locations to execute
 	//for testing speed
+	printf("BATCH\n");
 	sizeBatch = pickBatch();
 
 // Parallel for loop to execute each cell
-#pragma omp parallel private(i) 
-{
-        #pragma omp for  
+//#pragma omp parallel private(i) 
+//{
+	
+        //#pragma omp for  
         for (i = 0; i < sizeBatch; i++) {
-		executeCell(randomLocationX[i], randomLocationY[i]);
+		//executeCell(randomLocationX[i], randomLocationY[i]);
+		printf("next location is %d, %d\n", randomLocationX[i], randomLocationY[i]);
 
             //printf("current thread %d\n", omp_get_thread_num());
             //int cellIndex;
@@ -778,7 +781,7 @@ int main()  {
             //printf("rng %lu printing rn %lu\n", cellIndex, getRandomFromArray(cellIndex));
         
     	}
-}
+//}
 
 	// Finish timing parallel loop and print out time taken
 	gettimeofday(&fcnStop, NULL);

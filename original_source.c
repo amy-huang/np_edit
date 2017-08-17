@@ -240,7 +240,7 @@
 /* ----------------------------------------------------------------------- */
 
 /* Time in seconds after which to stop at. Comment this out to run forever. */
-#define STOP_AT 100
+#define STOP_AT 300000
 
 /* Frequency of comprehensive updates-- lower values will provide more
  * info while slowing down the simulation. Higher values will give less
@@ -265,7 +265,7 @@
 /* How frequently should random cells / energy be introduced?
  * Making this too high makes things very chaotic. Making it too low
  * might not introduce enough energy. */
-#define INFLOW_FREQUENCY 100
+//#define INFLOW_FREQUENCY 100
 
 /* Base amount of energy to introduce per INFLOW_FREQUENCY ticks */
 #define INFLOW_RATE_BASE 4000
@@ -1086,6 +1086,7 @@ int main(int argc,char **argv)
 		x = getRandom() % POND_SIZE_X;
 		y = getRandom() % POND_SIZE_Y;
 		currCell = &cellArray[x][y];
+		printf("next location is %d, %d\n", x, y);
 
 		/* Reset the state of the VM prior to execution */
 		for(i=0;i<MAX_WORDS_GENOME;++i)
@@ -1307,6 +1308,16 @@ int main(int argc,char **argv)
 					neighborCell->genome[i] = outputBuf[i];
 			}
 		}
+
+
+ #ifdef STOP_AT
+        if ((clock >= STOP_AT)) {
+                
+		//gettimeofday(&runStop, NULL);
+		//printf("run start: %lf run stop: %lf difference: %lf \n", (float) runStart.tv_sec, (float) runStop.tv_sec, (runStop.tv_sec - runStart.tv_sec) + (runStop.tv_usec - runStart.tv_usec)/1000000.0); 
+		exit(0);
+	}
+#endif 
 
 		/* Update the cellArray on SDL screen to show any changes since last instruction. */
 #ifdef USE_SDL_NOTYET
