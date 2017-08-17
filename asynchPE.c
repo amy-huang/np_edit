@@ -1,4 +1,3 @@
-// parallel edit of nanopond, from RNGs up
 
 #include <stdint.h>
 #include <stdio.h>
@@ -16,9 +15,9 @@
 // pond constants
 #define STOP_AT 3000000
 #define UPDATE_FREQUENCY 100000
-#define REPORT_FREQUENCY 10000000
-#define CLOCKUPDATE_FREQUENCY 10000
-#define CLOCKREPORT_FREQUENCY 10000000
+#define REPORT_FREQUENCY 10000
+#define CLOCKUPDATE_FREQUENCY 100
+#define CLOCKREPORT_FREQUENCY 10000
 #define MUTATION_RATE 21475
 #define INFLOW_FREQUENCY 100
 #define INFLOW_RATE_BASE 4000
@@ -28,7 +27,7 @@
 #define MAX_NUM_INSTR 512
 #define FAILED_KILL_PENALTY 2
 
-#define BATCH_SIZE 300 
+#define BATCH_SIZE 1000 
 
 #define MAX_WORDS_GENOME (MAX_NUM_INSTR / (sizeof(uintptr_t) * 2))
 #define BITS_IN_WORD (sizeof(uintptr_t) * 8)
@@ -280,6 +279,8 @@ static void doUpdate(const uintptr_t clock)
 
 static void doClockReport(const uintptr_t clock)
 {
+
+
 	char buf[MAX_NUM_INSTR*2];
 	FILE *d;
 	uintptr_t x,y,wordPtr,shiftPtr,inst,stopCount,i;
@@ -293,7 +294,8 @@ static void doClockReport(const uintptr_t clock)
 	}
   
 	fprintf(stderr,"[INFO] Reporting viable cells to %s\n",buf);
-  
+	printf("printing cell info\n");
+
 	for(x=0;x<POND_SIZE_X;++x) {
 		for(y=0;y<POND_SIZE_Y;++y) {
 			currCell = &cellArray[x][y];
@@ -436,8 +438,12 @@ int pickBatch() {
 	int stopBatch = 0;
 	int sizeBatch = 0;
 
+	randomLocationX[0] = firstX;
+	randomLocationY[0] = firstY;
+
 	// generate at most BATCH_SIZE cells to be executed at once
 	for (i = 1; i < BATCH_SIZE; i++) {     
+
         	x = getRandomFromArray(cellPickIndex) % POND_SIZE_X;
         	y = getRandomFromArray(cellPickIndex) % POND_SIZE_Y;
       
@@ -458,7 +464,7 @@ int pickBatch() {
 			}
 		}
 		if (stopBatch) {
-			printf("size of batch: % d\n", i);
+//			printf("size of batch: % d\n", i);
 			sizeBatch = i;
 			break;
 		}
@@ -779,8 +785,8 @@ int main()  {
 //	printf("array rng 1st time: %lf 2nd time: %lf difference: %lf \n", (float) fcnStart.tv_sec, (float) fcnStop.tv_sec, (fcnStop.tv_sec - fcnStart.tv_sec) + (fcnStop.tv_usec - fcnStart.tv_usec)/1000000.0); 
 
 	// Increment clock and number of cell executions by batch size
-	clock += BATCH_SIZE;
-	statCounters.cellExecutions += BATCH_SIZE;
+	clock += sizeBatch;
+	statCounters.cellExecutions += sizeBatch;
 	
 	// Introduce random cell with energy. Do this as many times as needed relative to batch size.	
 	for (i = 0; i < BATCH_SIZE / INFLOW_FREQUENCY; i++) {
@@ -816,12 +822,15 @@ int main()  {
 	//exit(0);    //ends forever loop after first batch
 	//printf("batch completed\n");
 	// Do updates and reports at defined intervals
-        if (!(clock % CLOCKUPDATE_FREQUENCY)) 
-                doClockUpdate(clock);
-        if (!(clock % CLOCKREPORT_FREQUENCY)) 
-                doClockReport(clock);
-        if (!(clock % UPDATE_FREQUENCY))
-                doUpdate(clock);
+	
+	//if (!(clock % CLOCKUPDATE_FREQUENCY)) 
+                //doClockUpdate(clock);
+        //if (!(clock % CLOCKREPORT_FREQUENCY)) { 
+         	//printf("report being made\n");
+	 //	doClockReport(clock);
+	//}
+        //if (!(clock % UPDATE_FREQUENCY))
+          //      doUpdate(clock);
         if (!(clock % REPORT_FREQUENCY))
                 doReport(clock);
     } // end batch execution loop
