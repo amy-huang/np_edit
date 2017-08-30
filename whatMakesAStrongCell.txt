@@ -1,3 +1,6 @@
+What makes a cell likely to reproduce and take over the pond? 
+I propose that a short genome that doesn't take too much energy, shares energy with all neighbors, and copies its genome to buffer will.
+
 // turn and share energy with all neighbors 
 inc register
 turn
