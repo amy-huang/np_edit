@@ -1,5 +1,14 @@
-// THIS IS ANOTHER TINYPOND VERSION MADE FROM THE ORIGINAL GUIDED BY ANOTHER TINYPOND
-// VERSION. SHOULD WORK LIKE THE ORIGINAL WHEN TINYPOND VARIATIONS ARE COMMENTED OUT
+/* 
+ * This is meant to see how nanopond works on a micro scale. 
+ * Default pond size is 9 x 9 cells; updates and reports can be printed out
+ * every cell execution.
+ * I used this to see if a cell genome I wrote would reproduce successfully
+ * without any mutations and guaranteed buffer copying into neighbor cells
+ * after genome execution.
+ * It ended up being a short one that used nested loops, mimicking the 
+ * genomes I saw in normal runs of nanopond that successfully made expanded
+ * into colonies.
+*/
 
 /* *********************************************************************** */
 /*                                                                         */
