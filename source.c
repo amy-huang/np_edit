@@ -1,3 +1,5 @@
+/* This is the original source code copied directly from the website. */
+
 /* *********************************************************************** */
 /*                                                                         */
 /* Nanopond version 1.9 -- A teeny tiny artificial life virtual machine    */
