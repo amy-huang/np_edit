@@ -1,9 +1,9 @@
-// THIS VERSION USES MULTIPLE RANDOM GENERATORS, BUT IS STILL SERIAL.
-// THE LAST INDEX OF THE ARRAY OF RNG ARRAYS IS USED TO PICK CELLS AND
-// INTRODUCE RANDOM CELLS WITH ENERGY.
-// THE REST ARE FOR EACH INDIVIDUAL CELL EXECUTION, ASSIGNED BY LOCATION.
-// A REPRODUCIBLE RESULT WOULD BE A PARALLEL VERSION THAT BEHAVES THE EXACT
-// SAME AS THIS ALTERED, SERIAL VERSION OF NANOPOND.
+/* 
+ * Version of nanopond that uses multiple random number generators--
+ * each cell is assigned its own instance with a different seed to 
+ * generate numbers for mutations and determining permission to access
+ * a neighboring cell.
+ */
 
 /* *********************************************************************** */
 /*                                                                         */
