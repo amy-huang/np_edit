@@ -1,4 +1,4 @@
-// parallel edit of nanopond, from RNGs up
+/* My latest parallel version of Nanopond. */
 
 #include <stdint.h>
 #include <stdio.h>
@@ -433,21 +433,7 @@ void pickBatch() {
 for (i = 0; i < BATCH_SIZE; i++) {     
         int x = getRandomFromArray(cellPickIndex) % POND_SIZE_X;
         int y = getRandomFromArray(cellPickIndex) % POND_SIZE_Y;
-    //commented out to choose locations randomly 
-/*   memset(cellConflicts, 0, sizeof(cellConflicts));
-
-        while (cellConflicts[x][y] > 0 && !cellArray[x][y]->energy) {	//make sure cell doesn't conflict and has energy 
-                x = getRandomFromArray(cellPickIndex) % POND_SIZE_X;
-                y = getRandomFromArray(cellPickIndex) % POND_SIZE_Y;
-        }    
-
-        //marks adjacent cells as taken for that batch
-        cellConflicts[x][y] = 1; 
-        cellConflicts[x + 1][y] = 1; 
-        cellConflicts[x - 1][y] = 1; 
-        cellConflicts[x][y + 1] = 1; 
-        cellConflicts[x][y - 1] = 1; 
-  */  
+	
       //if (clock - BATCH_SIZE > 0) { 	
         //while (!cellArray[x][y].energy) {	//make sure cell doesn't conflict and has energy 
                 x = getRandomFromArray(cellPickIndex) % POND_SIZE_X;
