@@ -1,9 +1,9 @@
-This repo was my playground for summer 2017 at LLNL under the guidance of Barry Rountree.
+During the summer of 2017, I worked with Barry Rountree at Lawrence Livermore National Laboratory on parallelizing an artificial life simulator called Nanopond. It is an open source program that mimics the behavior of bacteria colonies with an array of cells that are computer programs themselves--they can share energy, kill or replace neighboring cells in the grid. “Nano” refers to how the cells are small and simple programs, while “pond” refers to the organic behavior the resulting colonies take on.
 
-It needs a lot of cleaning up. Will be doing that this fine week of August 29, before I go back to Brown.
+It’s still an ongoing project. Our goal is to be able to run Nanopond with a huge number of threads on a supercomputer so that we could apply it to scientific problems on a large scale. For example: chess engines that duke it out for domination of the pond--perhaps we could train better chess engines.
 
-Todo:
-  delete files that I don't want here any more
-  name remaining ones better
-  explain what each is for in this readme
-  comment the differing bits of each version
+My part of the project was to find a way to compare a parallel version of Nanopond we wrote with the original serial one. Because each cell may alter its neighbors as it’s being executed, executing multiple cells in parallel likely changes the behavior of the simulation. We want to know how much our parallel versions do that. The original source code using a single random number generator made that nearly impossible, so I made a new reference source code version using multiple generators that allowed accuracy measurement. How I did this and verified that my version was still true to the original is explained in my research poster.
+
+Through this work I learned to program in C, fine tune program performance with the help of profilers, process massive amounts of data using Bash scripts and visualize information in R. I’ve got a good handle now on how to approach a scientific question with experimentation, learning what I need to on the way on my own and with other people. My overall task to predict and detect synchronization issues parallelizing Monte Carlo simulations pulled me in many directions, and I had to develop good judgement to decide what to pursue and to keep focus on incremental, concrete steps.
+
+In the future, I’d like to do more research dissecting computer system behavior and extracting data to analyze and visualize to provide insights. The process of shining light into the black box of some functionality and testing theories as to how it works is exciting to me, so contact me if you need someone to do that. I’ll learn what I need to along the way!
